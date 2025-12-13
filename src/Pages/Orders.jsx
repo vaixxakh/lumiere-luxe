@@ -12,19 +12,18 @@ function Orders() {
   const [filter, setFilter] = useState('all');
 
 useEffect(() => {
-  fetchUserOrders(); // initial load
+  fetchUserOrders();
 
   const interval = setInterval(() => {
-    fetchUserOrders(); // refresh every 5 sec
+    fetchUserOrders();
   }, 5000);
 
-  return () => clearInterval(interval); // cleanup
+  return () => clearInterval(interval); 
 }, []);
 
 
 const fetchUserOrders = async () => {
   try {
-    // Safe localStorage check (works in Vercel SSR)
     if (typeof window === "undefined") return;
 
     const storedUser = localStorage.getItem("user");
@@ -38,14 +37,13 @@ const fetchUserOrders = async () => {
     let userOrders = [];
 
     try {
-      //  Try backend first
+     
       const res = await axios.get(
         "https://lumiere-luxe-json-server-omega.vercel.app/api/orders"
       );
 
       userOrders = res.data.filter((order) => order.email === user.email);
 
-      // If backend has no orders fallback to local state
       if (userOrders.length === 0) {
         userOrders = orders.filter((order) => order.email === user.email);
       }
@@ -56,7 +54,7 @@ const fetchUserOrders = async () => {
 
     setOrders(userOrders);
 
-    // Update selectedOrder if it exists
+    
     if (selectedOrder) {
       const updatedSelected = userOrders.find(
         (o) =>
@@ -145,14 +143,14 @@ ${order.items?.map(item =>
 
 PRICE SUMMARY
 ─────────────────────────────────────────────────────────────
-Subtotal:        ₹${order.subtotal?.toLocaleString() || 0}
-Shipping:        ₹${order.shipping?.toLocaleString() || 0}
+Subtotal :        ₹${order.subtotal?.toLocaleString() || 0}
+Shipping Charge:        ₹${order.shipping?.toLocaleString() || 0}
 Tax (18%):       ₹${order.tax?.toLocaleString() || 0}
 ─────────────────────────────────────────────────────────────
 TOTAL:           ₹${order.total?.toLocaleString() || 0}
 
 
-Thank you for shopping with Lumiere! ✨
+Thank you for shopping with Lumiere! 
 
 
 For support, contact: [support@lumiere.com](mailto:support@lumiere.com)
