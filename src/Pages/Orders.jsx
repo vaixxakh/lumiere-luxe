@@ -38,9 +38,7 @@ const fetchUserOrders = async () => {
 
     try {
      
-      const res = await axios.get(
-        "https://lumiere-luxe-json-server-omega.vercel.app/api/orders"
-      );
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/orders`);
 
       userOrders = res.data.filter((order) => order.email === user.email);
 
@@ -201,9 +199,6 @@ For support, contact: [support@lumiere.com](mailto:support@lumiere.com)
             <ArrowLeft size={20} />
             Back to Home
           </button>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-black mb-2">
-            My Orders
-          </h1>
           <p className="text-gray-600">
             Total Orders: <span className="font-bold text-yellow-600">{orders.length}</span>
           </p>

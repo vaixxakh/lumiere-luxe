@@ -115,7 +115,7 @@ export const CartProvider = ({ children }) => {
   // SAVE ORDER TO BACKEND
   const saveOrderToBackend = async (order) => {
     try {
-      await axios.post("https://lumiere-luxe-json-server-omega.vercel.app/api/orders", order);
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/orders`, order);
       console.log("Order saved to backend:", order.orderId);
     } catch (error) {
       console.error("⚠️ Error saving to backend (still saved locally):", error);

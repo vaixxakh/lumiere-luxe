@@ -356,7 +356,7 @@ function Payment() {
             {/* Shipping Address */}
             <div className="bg-white rounded-lg sm:rounded-xl shadow-md p-4 sm:p-6 border border-gray-200">
               <h2 className="text-xl sm:text-2xl font-bold text-black mb-4 sm:mb-6">
-                📍 Shipping Address
+                Shipping Address
               </h2>
               <div className="space-y-3 sm:space-y-4">
                 <input
@@ -522,7 +522,7 @@ function Payment() {
           {/* Right Section: Order Summary */}
           <div className="bg-white rounded-lg sm:rounded-xl shadow-md p-4 sm:p-6 border border-gray-200 h-fit sticky top-4 sm:top-6">
             <h3 className="text-xl sm:text-2xl font-bold text-black mb-4 sm:mb-6">
-              📦 Order Summary
+             Order Summary
             </h3>
 
 

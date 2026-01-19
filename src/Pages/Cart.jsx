@@ -36,9 +36,6 @@ function Cart() {
             <ArrowLeft size={18} className="sm:w-5 sm:h-5" />
             Back to Home
           </button>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-black mb-2">
-            Shopping Cart
-          </h1>
           <p className="text-gray-600 text-sm sm:text-base">
             {cart.length} {cart.length === 1 ? 'item' : 'items'} in cart
           </p>

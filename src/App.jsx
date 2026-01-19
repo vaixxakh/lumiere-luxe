@@ -246,10 +246,10 @@ function App() {
           <Route 
             path="*" 
             element={
-              <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+              <div className="min-h-screen flex items-center justify-center ">
                 <div className="text-center">
-                  <h1 className="text-5xl font-bold text-yellow-400 mb-4">404</h1>
-                  <p className="text-gray-400 text-xl mb-6">Page not found</p>
+                  <h1 className="text-5xl font-bold text-red-500 mb-4">404</h1>
+                  <p className="text-red-5  00 text-xl  mb-6">Page not found</p>
                   <a 
                     href="/" 
                     className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-bold py-3 px-8 rounded-lg hover:from-yellow-500 hover:to-yellow-700 transition"

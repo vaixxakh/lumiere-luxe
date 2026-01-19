@@ -19,8 +19,9 @@ const ProductDetailsPage = () => {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
-    axios
-      .get(`https://lumiere-luxe-json-server-omega.vercel.app/api/products/${id}`)
+
+  axios
+      .get(`${import.meta.env.VITE_API_URL}/api/products/${id}`)
       .then((res) => {
         setProduct(res.data);
         setLoading(false);
@@ -29,7 +30,7 @@ const ProductDetailsPage = () => {
         console.error('Error fetching product:', err);
         setLoading(false);
         toast.error('Product not found!');
-        navigate('/products');
+        setTimeout(() =>  navigate('/products'), 1500);
       });
   }, [id, navigate]);
 
@@ -50,8 +51,8 @@ const ProductDetailsPage = () => {
   };
 
   const handleWishlist = () => {
-    if (isWishlisted(product.id)) {
-      removeFromWishlist(product.id);
+    if (isWishlisted(productId)) {
+      removeFromWishlist(productId);
     //   toast.info('Removed from wishlist', { autoClose: 1500 });
     } else {
       addToWishlist(product);
@@ -80,8 +81,9 @@ const ProductDetailsPage = () => {
       </div>
     );
   }
+  const productId = product._id || product.id;
 
-  const wishlisted = isWishlisted(product.id);
+  const wishlisted = isWishlisted(productId);
 
   // Mock multiple images (you can add more images to your product data)
   const productImages = [product.image, product.image, product.image];
@@ -183,14 +185,14 @@ const ProductDetailsPage = () => {
                 ))}
               </div>
               <span className="text-gray-600 font-semibold">
-                {product.reviews.toFixed(1)} / 5.0
+                {(product.reviews?? 0).toFixed(1)} / 5.0
               </span>
             </div>
 
             {/* Price */}
             <div className="mb-6">
               <p className="text-4xl font-bold text-red-700 mb-2">
-                ₹{product.price.toLocaleString()}
+                ₹{Number(product.price).toLocaleString()}
               </p>
               <p className="text-sm text-gray-600">Inclusive of all taxes</p>
             </div>

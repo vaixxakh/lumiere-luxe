@@ -13,77 +13,49 @@ function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
+
   const handleSignUp = async (e) => {
-    if (e) e.preventDefault();
+  e.preventDefault();
 
-    // Validation
-    if (!name || !email || !password) {
-      setMsgType('error');
-      setMessage('Please fill all fields');
-      return;
-    }
+  if (!name || !email || !password) {
+    setMsgType("error");
+    setMessage("Please fill all fields");
+    return;
+  }
 
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setMsgType('error');
-      setMessage('Please enter a valid email address');
-      return;
-    }
+  if (password.length < 6) {
+    setMsgType("error");
+    setMessage("Password must be at least 6 characters");
+    return;
+  }
 
-    // Password validation
-    if (password.length < 6) {
-      setMsgType('error');
-      setMessage('Password must be at least 6 characters');
-      return;
-    }
+  setLoading(true);
+  setMessage("");
 
-    setLoading(true);
-    setMessage('');
+  try {
+    const res = await axios.post(
+      `${import.meta.env.VITE_API_URL}/api/auth/register`,
+      { name, email, password }
+    );
 
-    try {
-      const API_URL = "https://lumiere-luxe-json-server-omega.vercel.app/api/users";
+    setMsgType("success");
+    setMessage("Signup successful! Redirecting to login...");
 
-      // Check existing users
-      const res = await axios.get(API_URL);
-      const existingUsers = res.data;
+    setTimeout(() => {
+      navigate("/login");
+    }, 1500);
 
-      const userExists = existingUsers.find((user) => user.email === email);
+  } catch (error) {
+    setMsgType("error");
+    setMessage(
+      error.response?.data?.message || "Signup failed"
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
-      if (userExists) {
-        setMsgType('error');
-        setMessage('This email is already registered! Please login.');
-        setLoading(false);
-        return;
-      }
 
-      const newUser = { 
-        id: Date.now(), 
-        name, 
-        email, 
-        password, 
-        isAdmin: false,
-        blocked: false 
-      };
-      const postRes = await axios.post(API_URL, newUser);
-
-      localStorage.setItem('user', JSON.stringify(postRes.data));
-
-      setMsgType('success');
-      setMessage('🎉 Signup successful! Redirecting...');
-      setLoading(false);
-
-      setTimeout(() => {
-        navigate('/login');
-        window.location.reload();
-      }, 1500);
-    } catch (error) {
-      console.error('Error saving user:', error);
-      setMsgType('error');
-      setMessage('⚠️ Error creating account. Please try again.');
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
@@ -109,8 +81,8 @@ function SignUp() {
         {/* Message Box */}
         {message && (
           <div
-            className={`mb-4 px-4 py-3 rounded-lg text-white text-center font-medium transition-all duration-300 ${
-              msgType === 'success' ? 'bg-green-500' : 'bg-red-500'
+            className={`mb-4 px-4 py-3 text-red text-center font-medium transition-all duration-300 ${
+              msgType === 'success' ? 'text-green-500' : 'text-red-500'
             }`}
           >
             {message}

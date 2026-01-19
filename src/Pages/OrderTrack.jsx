@@ -154,9 +154,6 @@ function OrderTrack() {
             <ArrowLeft size={18} className="sm:w-5 sm:h-5" />
             Back to Home
           </button>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-black mb-2">
-            📦 Order Tracking
-          </h1>
           <p className="text-gray-600 text-sm sm:text-base">
             Track your order status and estimated delivery date
           </p>

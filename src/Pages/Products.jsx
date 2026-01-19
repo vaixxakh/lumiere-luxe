@@ -5,14 +5,15 @@ import { useCart } from "../Context/CartContext";
 import { toast } from "react-toastify";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
+import Spinner from "../components/Spinner";
 
 const ProductsPage = ({ searchTerm }) => {
   const { addToWishlist, removeFromWishlist, isWishlisted, addToCart, setSingleBuy } = useCart();
-  const [products, setProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortOrder, setSortOrder] = useState("none");
+  const [loading, setLoading ] = useState(true);
 
-  //  useSearchParams for page persistence
   const [searchParams, setSearchParams] = useSearchParams();
   const initialPage = Number(searchParams.get("page")) || 1;
   const [currentPage, setCurrentPage] = useState(initialPage);
@@ -20,7 +21,6 @@ const ProductsPage = ({ searchTerm }) => {
   const navigate = useNavigate();
 
 
-  //  When page changes, update URL param
   useEffect(() => {
     setSearchParams({ page: currentPage });
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -45,40 +45,52 @@ const ProductsPage = ({ searchTerm }) => {
     navigate("/payment");
   };
 
-//  Wishlist - NO navigation, just toggles wishlist
+
   const handleWishlistToggle = (e, product) => {
     e.stopPropagation();
-    const wishlisted = isWishlisted(product.id);
+    const wishlisted = isWishlisted(product._id);
     if (wishlisted) {
-      removeFromWishlist(product.id);
+      removeFromWishlist(product._id);
     } else {
       addToWishlist(product);
    
     }
   };
 
-  // Card Click - Navigates to product details
   const handleProductClick = (productId) => {
     navigate(`/product/${productId}`);
   };
 
+// fetch products
+useEffect(() => {
+  let mounted = true;
 
+  axios.get(`${import.meta.env.VITE_API_URL}/api/products`)
+    .then((res) => {
+      if (mounted) {
+        setAllProducts(res.data);
+        setLoading(false);
+      }
+    })
+    .catch(() => setLoading(false));
 
-  useEffect(() => {
-    axios
-      .get("https://lumiere-luxe-json-server-omega.vercel.app/api/products")
-      .then((res) => setProducts(res.data))
-      .catch((err) => console.error("Error fetching products:", err));
-  }, []);
+  return () => {
+    mounted = false;
+  };
+}, []);
 
+     if(loading){
+      return <Spinner/>
+    }
 
-  const filteredProducts = products
+// filter products
+  const filteredProducts = allProducts
     .filter((p) =>
-      selectedCategory === "All" ? true : p.category === selectedCategory
-    )
+      selectedCategory === "All" ? true : p.category === selectedCategory)
+
     .filter((p) =>
-      p.name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+      p.name?.toLowerCase().includes((searchTerm || "").toLowerCase()))
+    
     .sort((a, b) => {
       if (sortOrder === "lowToHigh") return a.price - b.price;
       if (sortOrder === "highToLow") return b.price - a.price;
@@ -92,20 +104,17 @@ const ProductsPage = ({ searchTerm }) => {
   const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
 
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [currentPage]);
 
-  
   //  Pagination click functions (no change)
   const handlePrev = () => setCurrentPage((p) => Math.max(p - 1, 1));
   const handleNext = () => setCurrentPage((p) => Math.min(p + 1, totalPages));
-
-
+  
   return (
+    
     <section className="py-20 sm:py-24 md:py-32 bg-white min-h-screen">
+   
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        {/* Filter & Sort - RESPONSIVE */}
+      
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
           <div className="flex flex-col sm:flex-row w-full sm:w-auto space-y-3 sm:space-y-0 sm:space-x-4">
             <select
@@ -144,14 +153,14 @@ const ProductsPage = ({ searchTerm }) => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           
           {paginatedProducts.map((product, index) => {
-            const wishlisted = isWishlisted(product.id);
+            const wishlisted = isWishlisted(product._id);
             return (
               <motion.div
-                 key={product.id}
+                 key={product._id}
                   initial={{ opacity: 0, y: 40 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.15, duration: 0.8, type: "spring", stiffness: 100 }}
-                    onClick={() => handleProductClick(product.id)}
+                    onClick={() => handleProductClick(product._id)}
                     className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm"
               >
                 {/* Image Container */}
@@ -177,23 +186,13 @@ const ProductsPage = ({ searchTerm }) => {
                     />
                   </button>
                 </div>
-
-
-                {/* Content Section */}
                 <div className="p-4">
-                  {/* Product Name */}
                   <h2 className="text-sm sm:text-base font-semibold text-black mb-2 line-clamp-2 h-10">
                     {product.name}
                   </h2>
-
-
-                  {/* Description */}
                   <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 mb-3 h-9">
                     {product.description}
                   </p>
-
-
-                  {/* Reviews & Price */}
                   <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
                     <div className="flex items-center gap-1">
                       <Star size={14} className="text-green-600 fill-green-600" />

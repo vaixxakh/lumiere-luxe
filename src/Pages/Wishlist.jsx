@@ -26,9 +26,6 @@ function Wishlist() {
             <ArrowLeft size={20} />
             Back to Home
           </button>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-black mb-2">
-            My Wishlist
-          </h1>
           <p className="text-gray-600">
             {wishlist.length} {wishlist.length === 1 ? 'item' : 'items'} saved
           </p>
