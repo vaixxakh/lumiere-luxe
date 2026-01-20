@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import axios from 'axios';
 import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { useAuthModal } from "../Context/AuthModalContext";
 
 function Login() {
-  const navigate = useNavigate();
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
@@ -13,8 +11,13 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const { setShowLogin, setShowSignup } = useAuthModal();
+
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    if (loading) return;
+
 
     if (!email || !password) {
       setMsgType('error');
@@ -36,9 +39,9 @@ function Login() {
 
         setMsgType('success');
         setMessage('Welcome Admin! Login Successful!');
-
-        setTimeout(() => navigate('/admin'), 1000);
-        return;
+        setShowLogin(false);  
+        window.location.href='/admin';
+      return;
       }
 
       const res = await axios.post(
@@ -50,7 +53,7 @@ function Login() {
 
       if (!user) {
         setMsgType('error');
-        setMessage('Invalid email or password');
+        setMessage('User not found');
         setLoading(false);
         return;
       }
@@ -68,9 +71,9 @@ function Login() {
       setMsgType('success');
       setMessage(`Welcome back, ${user.name}!`);
 
-      setTimeout(() => {
-        user.isAdmin ? navigate('/admin') : navigate('/');
-      }, 1000);
+        setTimeout(() => {
+        setShowLogin(false); 
+      }, 800)
 
     } catch (error) {
       console.error(error);
@@ -82,101 +85,89 @@ function Login() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
-      <div className="bg-white shadow-2xl rounded-2xl p-8 w-full max-w-md border border-gray-100">
-
-        <div className="text-center mb-6">
+    <div className="bg-white shadow-2xl  p-9 w-full max-w-md border  border-gray-100">
+      <div className="text-center mb-6">
         <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
-        <span className="text-white font-bold text-2xl">Lu</span>
+          <span className="text-white font-bold text-2xl">Lu</span>
         </div>
         <h2 className="text-3xl font-bold text-gray-800">Welcome Back</h2>
         <p className="text-gray-600 text-sm mt-2">
-            Login to your Lumiere account
-        </p>
-        </div>
-
-      {/* back button */}
-        <button
-          onClick={() => navigate('/')}
-          className="flex items-center gap-2 text-yellow-600 hover:text-yellow-700 font-semibold mb-6"
-        >
-          <ArrowLeft size={20} /> Back to Home
-        </button>
-
-        {/* Message */}
-        {message && (
-          <div
-            className={`mb-4 px-4 py-3 rounded-lg text-red text-center font-medium ${
-              msgType === 'success' ? 'text-green-500' : 'text-red-500'
-            }`}
-          >
-            {message}
-          </div>
-        )}
-
-        {/* Form */}
-        <form onSubmit={handleLogin} className="space-y-4">
-
-          {/* Email */}
-          <div>
-            <label className="text-sm font-semibold text-gray-700 mb-2 block">
-              Email Address
-            </label>
-            <input
-              type="email"
-              value={email}
-              disabled={loading}
-              onChange={(e) => setEmail(e.target.value)}
-              className="border p-3 rounded-lg w-full focus:ring-2 focus:ring-yellow-400"
-              placeholder="Enter your email"
-            />
-          </div>
-
-          {/* Password */}
-          <div>
-            <label className="text-sm font-semibold text-gray-700 mb-2 block">
-              Password
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                disabled={loading}
-                onChange={(e) => setPassword(e.target.value)}
-                className="border p-3 rounded-lg w-full pr-10 focus:ring-2 focus:ring-yellow-400"
-                placeholder="Enter your password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2"
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
-            </div>
-          </div>
-
-          {/* Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-yellow-400 hover:bg-yellow-500 w-full py-3 rounded-lg font-bold"
-          >
-            {loading ? 'Logging in...' : 'Login'}
-          </button>
-        </form>
-
-        {/* Signup */}
-        <p className="text-center text-sm mt-6">
-          Don’t have an account?{' '}
-          <span
-            onClick={() => navigate('/signup')}
-            className="text-yellow-600 cursor-pointer font-semibold"
-          >
-            Sign up
-          </span>
+          Login to your Lumiere account
         </p>
       </div>
+
+     
+      {message && (
+        <div
+          className={`mb-4 px-4 py-3 rounded-lg text-center font-medium ${
+            msgType === "success" ? "text-green-500" : "text-red-500"
+          }`}
+        >
+          {message}
+        </div>
+      )}
+
+  
+      <form onSubmit={handleLogin} className="space-y-4">
+        <div>
+          <label className="text-sm font-semibold text-gray-700 block mb-2">
+            Email
+          </label>
+          <input
+            type="email"
+            value={email}
+            disabled={loading}
+            onChange={(e) => setEmail(e.target.value)}
+            className="border p-3 rounded-lg w-full focus:ring-2 focus:ring-yellow-400"
+            placeholder="Enter your email"
+          />
+        </div>
+
+        <div>
+          <label className="text-sm font-semibold text-gray-700 block mb-2">
+            Password
+          </label>
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              value={password}
+              disabled={loading}
+              onChange={(e) => setPassword(e.target.value)}
+              className="border p-3 rounded-lg w-full pr-10 focus:ring-2 focus:ring-yellow-400"
+              placeholder="Enter your password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2"
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-yellow-400 hover:bg-yellow-500 w-full py-3 rounded-lg font-bold"
+        >
+          {loading ? "Logging in..." : "Login"}
+        </button>
+      </form>
+
+      {/* Signup switch */}
+      <p className="text-center text-sm mt-6">
+        Don’t have an account?{" "}
+        <span
+          onClick={() => {
+            setShowLogin(false);
+            setShowSignup(true);
+          }}
+          className="text-yellow-600 cursor-pointer font-semibold"
+        >
+          Sign up
+        </span>
+      </p>
     </div>
   );
 }

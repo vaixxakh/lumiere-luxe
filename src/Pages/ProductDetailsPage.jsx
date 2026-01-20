@@ -110,7 +110,7 @@ const ProductDetailsPage = () => {
             transition={{ duration: 0.5 }}
           >
             {/* Main Image */}
-            <div className="relative bg-gray-100 rounded-2xl overflow-hidden mb-4 aspect-square">
+            <div className="relative bg-gray-100  overflow-hidden mb-4 aspect-square">
               <img
                 src={productImages[selectedImage]}
                 alt={product.name}
@@ -137,7 +137,7 @@ const ProductDetailsPage = () => {
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
-                  className={`relative aspect-square bg-gray-100 rounded-lg overflow-hidden border-2 transition-all ${
+                  className={`relative aspect-square bg-gray-100 overflow-hidden border-2 transition-all ${
                     selectedImage === index
                       ? 'border-yellow-500 scale-105'
                       : 'border-gray-200 hover:border-yellow-300'

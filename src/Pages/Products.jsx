@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { Heart, Star } from "lucide-react";
 import { useCart } from "../Context/CartContext";
 import { toast } from "react-toastify";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import Spinner from "../components/Spinner";
+import SkeletonCard from "../components/SkeletonCard";
+
+// import Spinner from "../components/Spinner";
 
 const ProductsPage = ({ searchTerm }) => {
   const { addToWishlist, removeFromWishlist, isWishlisted, addToCart, setSingleBuy } = useCart();
@@ -61,15 +63,23 @@ const ProductsPage = ({ searchTerm }) => {
     navigate(`/product/${productId}`);
   };
 
-// fetch products
+
+  /* ---------------- FETCH PRODUCTS ------------------*/
 useEffect(() => {
   let mounted = true;
+  const startTime = Date.now();
 
-  axios.get(`${import.meta.env.VITE_API_URL}/api/products`)
+  axios
+    .get(`${import.meta.env.VITE_API_URL}/api/products`)
     .then((res) => {
+        const elasped = Date.now() - startTime;
+        const delay = Math.max(1000 - elasped, 0)
+
       if (mounted) {
-        setAllProducts(res.data);
-        setLoading(false);
+        setTimeout(() => {
+          setAllProducts(res.data);
+          setLoading(false);
+        },delay);
       }
     })
     .catch(() => setLoading(false));
@@ -79,11 +89,9 @@ useEffect(() => {
   };
 }, []);
 
-     if(loading){
-      return <Spinner/>
-    }
+    
+  /* ---------------- FILTER + SORT ---------------- */
 
-// filter products
   const filteredProducts = allProducts
     .filter((p) =>
       selectedCategory === "All" ? true : p.category === selectedCategory)
@@ -104,10 +112,20 @@ useEffect(() => {
   const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
 
 
+  const handlePrev = () => {
+    setLoading(true)
+    setCurrentPage((p) => Math.max(p - 1, 1));
+    setTimeout(() =>  setLoading(false), 600)
+  };
 
-  //  Pagination click functions (no change)
-  const handlePrev = () => setCurrentPage((p) => Math.max(p - 1, 1));
-  const handleNext = () => setCurrentPage((p) => Math.min(p + 1, totalPages));
+  const handleNext = () => {
+    setLoading(true);
+    setCurrentPage((p) => Math.min(p + 1, totalPages));
+    setTimeout(() => setLoading(false), 600);
+
+  }
+
+   
   
   return (
     
@@ -120,8 +138,12 @@ useEffect(() => {
             <select
               value={selectedCategory}
               onChange={(e) => {
+                setLoading(true);  
                 setSelectedCategory(e.target.value);
                 setCurrentPage(1);
+                setTimeout(() => {
+                    setLoading(false);
+                }, 800);
               }}
               className="px-4 py-2 bg-white text-black text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
             >
@@ -136,8 +158,12 @@ useEffect(() => {
             <select
               value={sortOrder}
               onChange={(e) => {
+                setLoading(true);  
                 setSortOrder(e.target.value);
                 setCurrentPage(1);
+                  setTimeout(() => {
+                     setLoading(false);
+                }, 800);
               }}
               className="px-4 py-2 bg-white text-black text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
             >
@@ -149,19 +175,24 @@ useEffect(() => {
         </div>
 
 
-        {/* Product Grid - FULLY RESPONSIVE */}
+        {/* PRODUCT GRID */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           
-          {paginatedProducts.map((product, index) => {
+          {loading 
+          ? Array.from({ length:8}).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))
+          :
+          paginatedProducts.map((product, index) => {
             const wishlisted = isWishlisted(product._id);
             return (
               <motion.div
                  key={product._id}
-                  initial={{ opacity: 0, y: 40 }}
+                  initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.15, duration: 0.8, type: "spring", stiffness: 100 }}
+                 transition={{ delay: index * 0.08 }}
                     onClick={() => handleProductClick(product._id)}
-                    className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm"
+                    className="bg-white  overflow-hidden shadow-sm cursor-pointer"
               >
                 {/* Image Container */}
                 <div className="relative overflow-hidden h-48 sm:h-56 bg-gray-100">

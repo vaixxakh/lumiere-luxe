@@ -3,6 +3,7 @@ import { ShoppingCart, Heart, User, Search, Menu, X } from "lucide-react";
 import { Link, useNavigate,useLocation} from "react-router-dom";
 import { useCart } from "../Context/CartContext";
 import { motion } from 'framer-motion';
+import { useAuthModal } from "../Context/AuthModalContext";
 
 function Navbar({ onSearch = () => {} }) {
   const location = useLocation();
@@ -15,20 +16,20 @@ function Navbar({ onSearch = () => {} }) {
   const userMenuRef = useRef(null);
   const userMenuRefMobile = useRef(null);
 
+  const { setShowLogin, setShowSignup } = useAuthModal();
+
 
   const isProductsPage = location.pathname === "/products";
 
 
-  // Cart & wishlist counts
   const { cartCount, wishlistCount } = useCart();
 
-  // Load user from localStorage
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     if (storedUser) setUser(storedUser);
   }, []);
 
-  // Search submit handler
+  
   const handleSearch = (e) => {
     e.preventDefault();
     if (!searchItem.trim()) return;
@@ -38,12 +39,12 @@ function Navbar({ onSearch = () => {} }) {
   };
 const handleHomeClick = () => {
     if (location.pathname === "/") {
-      window.location.reload(); // Force full refresh if already in home
+      window.location.reload(); 
     } else {
-      navigate("/"); // Normal navigate if not in home
+      navigate("/");
     }
   };
-  // Close user menu on outside click (fixed condition)
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -59,16 +60,16 @@ const handleHomeClick = () => {
 
    const handleNavClick = (path) => {
     if (location.pathname === path) {
-      window.location.reload(); // Refresh if same route
+      window.location.reload();
     } else {
-      navigate(path); // Navigate if different
+      navigate(path); 
     }
   };
    const handleLogout = () => {
     localStorage.removeItem("user");  
     setUser(null);
     setShowUserMenu(false);
-    navigate("/login");
+    setShowLogin(true);
   };
 
 
@@ -180,20 +181,26 @@ const handleHomeClick = () => {
                   </button>
                 ) : (
                   <>
-                    <Link
-                      to="/login"
+                    <button
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-600"
-                      onClick={() => setShowUserMenu(false)}
+                      onClick={() => {
+                          setShowUserMenu(false);
+                          setShowSignup(false);
+                          setShowLogin(true);
+                      }}
                     >
                       Login
-                    </Link>
-                    <Link
-                      to="/signup"
+                    </button>
+                    <button
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-600"
-                      onClick={() => setShowUserMenu(false)}
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        setShowLogin(false);
+                        setShowSignup(true);
+                      }}
                     >
                       Sign Up
-                    </Link>
+                    </button>
                   </>
                 )}
               </motion.div>
@@ -280,20 +287,26 @@ const handleHomeClick = () => {
                   </>
                 ) : (
                   <>
-                    <Link
-                      to="/login"
-                      onClick={() => setShowUserMenu(false)}
+                    <button
+                       onClick={() => {
+                        setShowUserMenu(false);
+                        setShowLogin(false);
+                        setShowSignup(true);
+                      }}
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-600"
                     >
                       Login
-                    </Link>
-                    <Link
-                      to="/signup"
-                      onClick={() => setShowUserMenu(false)}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        setShowLogin(false);
+                        setShowSignup(true);
+                      }}
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-600"
                     >
                       Sign Up
-                    </Link>
+                    </button>
                   </>
                 )}
               </motion.div>

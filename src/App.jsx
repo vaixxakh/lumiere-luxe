@@ -1,7 +1,10 @@
-import React, { useState } from "react";
+import { useState,useEffect } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
+import { AuthModalProvider } from "./Context/AuthModalContext";
+import { useAuthModal } from "./Context/AuthModalContext";
 
 // Components
 import Navbar from "./components/Navbar";
@@ -20,9 +23,10 @@ import Payment from "./Pages/Payment";
 import OrderTrack from "./Pages/OrderTrack";
 import Orders from "./Pages/Orders";
 import Account from "./Pages/Account";
-import Contact from './Pages/Contact'
-import About from './Pages/About'
+import Contact from "./Pages/Contact";
+import About from "./Pages/About";
 import ProductDetailsPage from "./Pages/ProductDetailsPage";
+
 // Admin Pages
 import AdminLayout from "./Pages/admin/AdminLayout";
 import AdminDashboard from "./Pages/admin/AdminDashboard";
@@ -31,123 +35,97 @@ import AdminOrders from "./Pages/admin/AdminOrders";
 import AdminUsers from "./Pages/admin/AdminUsers";
 import AdminRoute from "./components/AdminRoute";
 
+import ProtectedRoute from "./components/ProtectedRoute";
 
-
-//  PROTECTED ROUTE COMPONENT
-const ProtectedRoute = ({ children }) => {
-  const user = localStorage.getItem("user");
-  
-  if (!user) {
-    toast.warning("Please login to access this feature", {
-      position: "top-center",
-      autoClose: 2000,
-      theme: "colored",
-    });
-    return <Navigate to="/login" replace />;
-  }
-  
-  return children;
-};
-
-//  ADMIN PROTECTED ROUTE COMPONENT
+/* =========================
+   ADMIN PROTECTED ROUTE
+========================= */
 const AdminProtected = ({ children }) => {
   const adminToken = localStorage.getItem("adminToken");
+
   if (!adminToken || adminToken !== "true") {
     toast.error("Admin access required", {
       position: "top-center",
       autoClose: 2000,
-      theme: "colored",
     });
     return <Navigate to="/admin/login" replace />;
   }
+
   return children;
 };
 
-//  LAYOUT WRAPPER COMPONENT
+/* =========================
+   LAYOUT
+========================= */
 const Layout = ({ children }) => {
   const location = useLocation();
-  
-  //  Pages where Navbar & Footer should NOT appear
+
   const NO_LAYOUT_PAGES = [
     "/login",
     "/signup",
     "/admin/login",
     "/payment",
-    "/account"
+    "/account",
   ];
-  
-  //  Hide layout for admin routes
+
   const isAdminRoute = location.pathname.startsWith("/admin");
   const isNoLayoutPage = NO_LAYOUT_PAGES.includes(location.pathname);
   const shouldHideLayout = isAdminRoute || isNoLayoutPage;
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Navbar - Hide on login, signup, admin pages */}
       {!shouldHideLayout && <Navbar />}
-
-      {/* Main Content */}
-      <main className="flex-1">
-        {children}
-      </main>
-
-      {/* Footer - Hide on login, signup, admin pages */}
-    
+      <main className="flex-1">{children}</main>
     </div>
   );
 };
 
-//  MAIN APP COMPONENT
-function App() {
-  const [searchTerm, setSearchTerm] = useState("");
+/* =========================
+   APP INNER (ROUTES + MODALS)
+========================= */
+function AppInner() {
   const location = useLocation();
+  const [searchTerm, setSearchTerm] = useState("");
 
+  const {
+    showLogin,
+    setShowLogin,
+    showSignup,
+    setShowSignup,
+  } = useAuthModal();
 
-  const handleSearch = (term) => {
-    setSearchTerm(term);
-  };
+  const handleSearch = (term) => setSearchTerm(term);
+
+ useEffect(() => {
+        if(showLogin || showSignup){
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "auto";
+        }
+
+        return  () => {
+            document.body.style.overflow = "auto";
+        };
+    }, [showLogin, showSignup])
 
   return (
     <>
-      {/* Toast Notifications */}
-      <ToastContainer 
-        position="top-center" 
-        autoClose={1500}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
+      <ToastContainer position="top-center" autoClose={1500} />
 
-      {/* App Layout with Routes */}
       <Layout>
-        <ScrollToTop/>
+        <ScrollToTop />
         <Routes>
-          
-          {/* ============================================
-              PUBLIC ROUTES (No Auth Required)
-              ============================================ */}
+          {/* PUBLIC */}
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/collections" element={<LuxuryProducts />} />
           <Route path="/products" element={<Products searchTerm={searchTerm} />} />
-           <Route path="/product/:id" element={<ProductDetailsPage />} />
+          <Route path="/product/:id" element={<ProductDetailsPage />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/track/:orderId" element={<OrderTrack />} />
 
-          {/* ============================================
-              AUTH ROUTES (No Layout)
-              ============================================ */}
-          <Route path="/login" element={<Login onSearch={handleSearch} />} />
-          <Route path="/signup" element={<SignUp onSearch={handleSearch} />} />
 
-          {/* ============================================
-              PROTECTED USER ROUTES (Auth Required)
-              ============================================ */}
-       
+          {/* PROTECTED */}
           <Route
             path="/cart"
             element={
@@ -189,12 +167,7 @@ function App() {
             }
           />
 
-          {/* ============================================
-              ADMIN ROUTES (Admin Auth Required)
-              ============================================ */}
-                  {/* ============================================ */}
-          {/* <Route path="/admin/login" element={<AdminLogin />} /> */}
-
+          {/* ADMIN */}
           <Route
             path="/admin"
             element={
@@ -203,7 +176,6 @@ function App() {
               </AdminProtected>
             }
           >
-            {/* Each admin page is now wrapped with AdminRoute */}
             <Route
               index
               element={
@@ -212,7 +184,6 @@ function App() {
                 </AdminRoute>
               }
             />
-
             <Route
               path="products"
               element={
@@ -221,7 +192,6 @@ function App() {
                 </AdminRoute>
               }
             />
-
             <Route
               path="orders"
               element={
@@ -230,7 +200,6 @@ function App() {
                 </AdminRoute>
               }
             />
-
             <Route
               path="users"
               element={
@@ -241,30 +210,58 @@ function App() {
             />
           </Route>
 
-
-          {/* CATCH-ALL (404 Not Found) */}
-          <Route 
-            path="*" 
+          {/* 404 */}
+          <Route
+            path="*"
             element={
-              <div className="min-h-screen flex items-center justify-center ">
-                <div className="text-center">
-                  <h1 className="text-5xl font-bold text-red-500 mb-4">404</h1>
-                  <p className="text-red-5  00 text-xl  mb-6">Page not found</p>
-                  <a 
-                    href="/" 
-                    className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-bold py-3 px-8 rounded-lg hover:from-yellow-500 hover:to-yellow-700 transition"
-                  >
-                    Go Home
-                  </a>
-                </div>
+              <div className="min-h-screen flex items-center justify-center">
+                <h1 className="text-4xl font-bold text-red-500">404 Page Not Found</h1>
               </div>
-            } 
+            }
           />
         </Routes>
       </Layout>
+
+      {/* LOGIN MODAL */}
+      {showLogin && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowLogin(false)}
+          />
+          <div className="relative z-10">
+            <Login />
+          </div>
+        </div>
+      )}
+
+      {/* SIGNUP MODAL */}
+      {showSignup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowSignup(false)}
+          />
+          <div className="relative z-10">
+            <SignUp />
+          </div>
+        </div>
+      )}
+
       {location.pathname === "/" && <Footer />}
     </>
   );
 }
 
-export default App;
+/* =========================
+   MAIN APP
+========================= */
+
+export default function App() {
+  return (
+    <AuthModalProvider>
+      <AppInner />
+    </AuthModalProvider>
+  );
+}
+
