@@ -4,6 +4,8 @@ import { Link, useNavigate,useLocation} from "react-router-dom";
 import { useCart } from "../Context/CartContext";
 import { motion } from 'framer-motion';
 import { useAuthModal } from "../Context/AuthModalContext";
+import logo from "../assets/lumiere/logo-lumiere.png"
+import "./Navbar.css";
 
 function Navbar({ onSearch = () => {} }) {
   const location = useLocation();
@@ -74,25 +76,31 @@ const handleHomeClick = () => {
 
 
   return (
-    <nav className="fixed top-0 left-0 w-full bg-white shadow-lg border-b border-gray-200 z-50">
-      <div className="max-w-7xl mx-auto flex justify-between items-center px-5 py-3">
+    <nav className="fixed top-0 left-0 w-full bg-white shadow-lg border-b border-gray-200 z-50 navbar">
+      <div className="max-w-7xl mx-auto flex justify-between items-center px-5 py-3 navbar-container">
         {/* LOGO */}
-        <Link to="/" onClick={() => handleNavClick("/")} className="flex flex-col items-start leading-tight">
-          <span className="text-2xl sm:text-3xl font-extrabold text-black  tracking-wide font-serif">
-            Lumiere
-          </span>
-          <span className="text-xs sm:text-sm text-gray-600 uppercase tracking-widest font-sans">
-            L i g h t i n g
-          </span>
+        <div className="logo-wrapper">
+              <Link
+          to="/"
+          onClick={() => handleNavClick("/")}
+          className="flex items-center"
+        >
+          <img
+            src={logo}
+            alt="Lumiere Lighting Logo"
+            className="logo"
+          />
         </Link>
+        </div>
 
         {/* DESKTOP MENU */}
-        <div className="hidden md:flex space-x-6 items-center mt-4 gap-4 font-small text-gray-700">
-          <Link to="/" onClick={() => handleNavClick("/")} className="hover:text-yellow-600 transition">HOME</Link>
-          <Link to="/about" onClick={() => handleNavClick("/about")} className="hover:text-yellow-600 transition">ABOUT</Link>
-          <Link to="/products" onClick={() => handleNavClick("/products")} className="hover:text-yellow-600 transition">PRODUCTS</Link>
-          {/* <Link to="/collections" onClick={() => handleNavClick("/collections")}  className="hover:text-yellow-600 transition">CATEGORIES</Link> */}
-          <Link to="/contact" onClick={() => handleNavClick("/contact")} className="hover:text-yellow-600 transition">CONTACT US</Link>
+        <div className="hidden md:flex space-x-6 items-center mt-4 gap-4 font-small text-gray-700 nav-menu-text ">
+          <Link to="/" onClick={() => handleNavClick("/")} className="hover-underline">HOME</Link>
+          <Link to="/about" onClick={() => handleNavClick("/about")} className="hover-underline" >ABOUT</Link>
+          <Link to="/products" onClick={() => handleNavClick("/products")} className="hover-underline" >SHOP BY</Link>
+          <Link to="/contact" onClick={() => handleNavClick("/contact")} className="hover-underline" >CONTACT US</Link>
+          <Link to="/contact" onClick={() => handleNavClick("/contact")} className="hover-underline" >CATEGORIES</Link>
+          <Link to="/contact" onClick={() => handleNavClick("/contact")} className="hover-underline" >GALLERY</Link>
         </div>
 
         {/* DESKTOP ICONS */}

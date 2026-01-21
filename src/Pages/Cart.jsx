@@ -1,20 +1,28 @@
-import React,{useState, useEffect} from 'react';
-import { useCart } from '../Context/CartContext';
-import { Link, useNavigate } from 'react-router-dom';
-import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft } from 'lucide-react';
-
+import React, { useState, useEffect } from "react";
+import { useCart } from "../Context/CartContext";
+import { Link, useNavigate } from "react-router-dom";
+import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft } from "lucide-react";
+import "./Cart.css";
 
 function Cart() {
-   const { cart, removeFromCart, updateQuantity } = useCart();
+  const { cart, removeFromCart, updateQuantity } = useCart();
   const navigate = useNavigate();
 
   const [subtotal, setSubtotal] = useState(0);
   const shipping = 100;
 
+  const safePrice = (price) => Number(price) || 0;
+
+ 
+  const totalItems = cart.reduce(
+    (sum, item) => sum + (item.quantity || 1),
+    0
+  );
+
   useEffect(() => {
-    // Calculate subtotal safely
     const sum = cart.reduce(
-      (total, item) => total + (Number(item.price) || 0) * (item.quantity || 1),
+      (total, item) =>
+        total + safePrice(item.price) * (item.quantity || 1),
       0
     );
     setSubtotal(sum);
@@ -23,161 +31,150 @@ function Cart() {
   const tax = Math.round(subtotal * 0.18);
   const total = subtotal + shipping + tax;
 
+  const handleCheckout = () => {
+    if (cart.length === 0) return;
+    navigate("/payment");
+  };
 
   return (
     <div className="min-h-screen bg-white py-12 sm:py-16 md:py-20 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
+
         <div className="mb-6 sm:mb-8">
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate("/")}
             className="flex items-center gap-2 text-yellow-600 hover:text-yellow-700 font-semibold mb-4 transition text-sm sm:text-base"
           >
-            <ArrowLeft size={18} className="sm:w-5 sm:h-5" />
+            <ArrowLeft size={18} />
             Back to Home
           </button>
+
           <p className="text-gray-600 text-sm sm:text-base">
-            {cart.length} {cart.length === 1 ? 'item' : 'items'} in cart
+            {totalItems} {totalItems === 1 ? "item" : "items"} in cart
           </p>
         </div>
 
-
+       
         {cart.length === 0 ? (
-          <div className="bg-white rounded-lg sm:rounded-xl shadow-lg p-8 sm:p-12 text-center border border-gray-200">
+          <div className="bg-white  shadow-lg p-10 text-center border">
             <ShoppingBag size={48} className="mx-auto text-gray-300 mb-4" />
-            <p className="text-gray-600 text-base sm:text-lg mb-6">Your cart is empty</p>
+            <p className="text-gray-600 mb-6">Your cart is empty</p>
             <Link
               to="/products"
-              className="inline-block bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2.5 sm:py-3 px-6 sm:px-8 rounded-lg transition shadow-md text-sm sm:text-base"
+              className="inline-block bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-8 rounded-lg transition"
             >
               Continue Shopping
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-            {/* Cart Items */}
-            <div className="lg:col-span-2 space-y-3 sm:space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <div className="lg:col-span-2 space-y-4">
               {cart.map((item) => (
                 <div
-                  key={item.id}
-                  className="bg-white rounded-lg sm:rounded-xl shadow-md p-4 sm:p-6 flex flex-col sm:flex-row gap-4 sm:gap-6 border border-gray-200"
+                  key={item._id || item.id}
+                  className="bg-white shadow-md p-6 flex gap-6 border"
                 >
-                  {/* Product Image */}
                   <img
                     src={item.image}
                     alt={item.name}
-                    className="w-full sm:w-24 h-40 sm:h-24 object-cover rounded-lg"
+                    className="w-24 h-24 object-cover rounded-lg"
                   />
 
-
-                  {/* Product Details */}
                   <div className="flex-1">
-                    <h3 className="font-bold text-black text-base sm:text-lg">{item.name}</h3>
-                    <p className="text-yellow-600 font-bold text-lg sm:text-xl mt-2">
-                      ₹{item.price?.toLocaleString()}
+                    <h3 className="font-bold text-lg">{item.name}</h3>
+                    <p className="text-yellow-600 font-bold text-xl mt-1">
+                      ₹{safePrice(item.price).toLocaleString()}
                     </p>
 
-
-                    {/* Quantity Controls */}
-                    <div className="flex items-center gap-2 mt-3 sm:mt-4">
+                    {/* Quantity */}
+                    <div className="flex items-center gap-2 mt-4">
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="bg-gray-200 hover:bg-gray-300 text-black p-1.5 sm:p-2 rounded-lg transition"
-                        aria-label="Decrease quantity"
+                        onClick={() =>
+                          updateQuantity(item._id || item.id, item.quantity - 1)
+                        }
+                        className="bg-gray-200 p-2 rounded-lg"
                       >
                         <Minus size={16} />
                       </button>
-                      <span className="px-3 sm:px-4 py-1 bg-gray-100 rounded-lg text-black font-bold text-center min-w-12">
+
+                      <span className="px-4 py-1 bg-gray-100 rounded-lg font-bold">
                         {item.quantity}
                       </span>
+
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="bg-gray-200 hover:bg-gray-300 text-black p-1.5 sm:p-2 rounded-lg transition"
-                        aria-label="Increase quantity"
+                        onClick={() =>
+                          updateQuantity(item._id || item.id, item.quantity + 1)
+                        }
+                        className="bg-gray-200 p-2 rounded-lg"
                       >
                         <Plus size={16} />
                       </button>
                     </div>
                   </div>
 
-
-                  {/* Total & Remove */}
-                  <div className="text-right flex flex-row sm:flex-col justify-between sm:justify-between gap-4">
+                  <div className="flex flex-col justify-between text-right">
                     <div>
-                      <p className="text-xs sm:text-sm text-gray-600">Subtotal</p>
-                      <p className="font-bold text-black text-base sm:text-lg">
-                        ₹{(item.price * item.quantity).toLocaleString()}
+                      <p className="text-sm text-gray-600">Subtotal</p>
+                      <p className="font-bold text-lg">
+                        ₹
+                        {(
+                          safePrice(item.price) * item.quantity
+                        ).toLocaleString()}
                       </p>
                     </div>
+
                     <button
-                      onClick={() => removeFromCart(item.id)}
-                      className="text-red-500 hover:text-red-600 hover:bg-red-100 p-2 rounded-lg transition"
-                      aria-label="Remove item"
+                      onClick={() =>
+                        removeFromCart(item._id || item.id)
+                      }
+                      className="text-red-500 hover:bg-red-100 p-2 r"
                     >
-                      <Trash2 size={18} className="sm:w-5 sm:h-5" />
+                      <Trash2 size={18} />
                     </button>
                   </div>
                 </div>
               ))}
             </div>
 
+            <div className="bg-white  shadow-lg p-6 border h-fit sticky top-6">
+              <h3 className="text-2xl font-bold mb-6">Order Summary</h3>
 
-            {/* Order Summary */}
-            <div className="bg-white rounded-lg sm:rounded-xl shadow-lg p-4 sm:p-6 border border-gray-200 h-fit sticky top-4 sm:top-6">
-              <h3 className="text-xl sm:text-2xl font-bold text-black mb-4 sm:mb-6">Order Summary</h3>
-
-
-              {/* Price Breakdown */}
-              <div className="border-t border-gray-200 pt-3 sm:pt-4 mb-3 sm:mb-4 space-y-2 sm:space-y-3">
-                <div className="flex justify-between text-xs sm:text-sm text-gray-600">
-                  <span>Subtotal:</span>
-                  <span className="font-semibold text-black">₹{subtotal.toLocaleString()}</span>
+              <div className="space-y-3 border-t pt-4">
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span>₹{subtotal.toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between text-xs sm:text-sm text-gray-600">
-                  <span>Shipping:</span>
-                  <span className="font-semibold text-black">₹{shipping.toLocaleString()}</span>
+                <div className="flex justify-between">
+                  <span>Shipping</span>
+                  <span>₹{shipping}</span>
                 </div>
-                <div className="flex justify-between text-xs sm:text-sm text-gray-600">
-                  <span>Tax (18%):</span>
-                  <span className="font-semibold text-black">₹{tax.toLocaleString()}</span>
+                <div className="flex justify-between">
+                  <span>Tax (18%)</span>
+                  <span>₹{tax}</span>
                 </div>
               </div>
 
-
-              {/* Total */}
-              <div className="border-t border-gray-200 pt-3 sm:pt-4 mb-4 sm:mb-6">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm sm:text-base font-bold text-gray-700">Total:</span>
-                  <span className="text-xl sm:text-2xl font-black text-yellow-600">
-                    ₹{total.toLocaleString()}
-                  </span>
-                </div>
+              <div className="border-t mt-4 pt-4 flex justify-between text-xl font-bold">
+                <span>Total</span>
+                <span className="text-yellow-600">
+                  ₹{total.toLocaleString()}
+                </span>
               </div>
 
-
-              {/* Buttons */}
               <button
-                onClick={() => navigate('/payment')}
-                className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2.5 sm:py-3 px-4 rounded-lg transition shadow-md text-sm sm:text-base mb-2 sm:mb-3"
+                onClick={handleCheckout}
+                className="w-full mt-6 bg-yellow-400 hover:bg-yellow-500 py-3 rounded-lg font-bold"
               >
                 Proceed to Checkout
               </button>
 
-
               <Link
                 to="/products"
-                className="block text-center text-yellow-600 hover:text-yellow-700 font-semibold py-2 transition text-sm sm:text-base"
+                className="block text-center mt-4 text-yellow-600 font-semibold"
               >
                 Continue Shopping
               </Link>
-
-
-              {/* Info */}
-              <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200">
-                <p className="text-xs text-gray-500 text-center">
-                  🚚 Free shipping on orders above ₹500
-                </p>
-              </div>
             </div>
           </div>
         )}
@@ -185,6 +182,5 @@ function Cart() {
     </div>
   );
 }
-
 
 export default Cart;

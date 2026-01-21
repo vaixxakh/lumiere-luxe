@@ -241,13 +241,13 @@ useEffect(() => {
                   <div className="space-y-2">
                     <button
                       onClick={() => handleAddToCart(product)}
-                      className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-2 rounded-lg text-xs sm:text-sm transition-colors"
+                      className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-2  text-xs sm:text-sm transition-colors"
                     >
                       Add to Cart
                     </button>
                     <button
                       onClick={(e) => handleBuyNow(e,product)}
-                      className="w-full bg-yellow-400 hover:bg-yellow-500 text-black  font-semibold py-2 rounded-lg text-xs sm:text-sm transition-colors"
+                      className="w-full bg-orange-500 hover:bg-orange-400 text-black  font-semibold py-2  text-xs sm:text-sm transition-colors"
                     >
                       Buy Now
                     </button>

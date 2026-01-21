@@ -167,7 +167,7 @@ const ContactPage = () => {
             <div className="p-8 md:p-12">
               <h2 className="text-3xl font-bold text-slate-900 mb-2">Send us a message</h2>
               <p className="text-slate-600 mb-8">Fill out the form below and we'll get back to you within 24 hours</p>
-
+            
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Name Input */}
                 <motion.div

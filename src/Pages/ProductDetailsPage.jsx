@@ -1,38 +1,55 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import { Heart, ShoppingCart, Star, Truck, Shield, RefreshCw, ArrowLeft, Plus, Minus } from 'lucide-react';
+import {
+      Heart, 
+      ShoppingCart, 
+      Star,
+      Truck,
+      Shield,
+      RefreshCw,
+      ArrowLeft,
+      Plus,
+      Minus
+     } from 'lucide-react';
 import { useCart } from '../Context/CartContext';
 import { toast } from 'react-toastify';
 
 const ProductDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { addToCart, addToWishlist, removeFromWishlist, isWishlisted, setSingleBuy } = useCart();
+
+  const { 
+    addToCart, 
+    addToWishlist, 
+    removeFromWishlist, 
+    isWishlisted, 
+    setSingleBuy 
+  } = useCart();
   
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
 
+  const token = localStorage.getItem("token");
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
-
   axios
       .get(`${import.meta.env.VITE_API_URL}/api/products/${id}`)
       .then((res) => {
         setProduct(res.data);
         setLoading(false);
       })
-      .catch((err) => {
-        console.error('Error fetching product:', err);
-        setLoading(false);
+      .catch(() => {
         toast.error('Product not found!');
-        setTimeout(() =>  navigate('/products'), 1500);
+        navigate('/products');
       });
   }, [id, navigate]);
+
 
   const handleAddToCart = () => {
     const productWithQuantity = { ...product, quantity };
@@ -50,13 +67,22 @@ const ProductDetailsPage = () => {
     navigate('/payment');
   };
 
+const productId = product?._id || product?.id;
+const wishlisted = productId ? isWishlisted(productId) : false;
+
+
   const handleWishlist = () => {
-    if (isWishlisted(productId)) {
+    if(!token) {
+      toast.error("Please login first!")
+      return;
+      
+    }
+    if(wishlisted) {
       removeFromWishlist(productId);
-    //   toast.info('Removed from wishlist', { autoClose: 1500 });
+      toast.info("Remove from wishlist")
     } else {
       addToWishlist(product);
-    //   toast.success(' Added to wishlist!', { autoClose: 1500 });
+      toast.success("Added to wishlist")
     }
   };
 
@@ -81,17 +107,19 @@ const ProductDetailsPage = () => {
       </div>
     );
   }
-  const productId = product._id || product.id;
+ 
 
-  const wishlisted = isWishlisted(productId);
 
-  // Mock multiple images (you can add more images to your product data)
-  const productImages = [product.image, product.image, product.image];
+  const productImages = [
+    product.image, 
+    product.image, 
+    product.image
+  ];
 
   return (
     <div className="min-h-screen bg-white py-8 sm:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Back Button */}
+      
         <motion.button
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -233,7 +261,7 @@ const ProductDetailsPage = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleAddToCart}
-                className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-4 rounded-lg flex items-center justify-center gap-2 transition-colors shadow-lg"
+                className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-4 flex items-center justify-center gap-2 transition-colors shadow-lg"
               >
                 <ShoppingCart size={20} />
                 Add to Cart
@@ -243,7 +271,7 @@ const ProductDetailsPage = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleBuyNow}
-                className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-4 rounded-lg flex items-center justify-center gap-2 transition-colors shadow-lg"
+                className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-4  flex items-center justify-center gap-2 transition-colors shadow-lg"
               >
                 Buy Now
               </motion.button>
