@@ -4,10 +4,11 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Lock, Loader, ArrowLeft } from "lucide-react";
 import { toast } from "react-toastify";
+import "./Payment.css"
 
 function Payment() {
   const navigate = useNavigate();
-  const { cart, removeFromCart, createOrder, singleBuy, setSingleBuy } = useCart();
+  const { cart, removeFromCart, singleBuy, setSingleBuy } = useCart();
 
   const [processing, setProcessing] = useState(false);
 
@@ -28,7 +29,8 @@ function Payment() {
     (sum, i) => sum + Number(i.price) * i.quantity,
     0
   );
-  const shipping = 100;
+
+  const shipping = 50;
   const tax = Math.round(subtotal * 0.18);
   const grandTotal = subtotal + shipping + tax;
 
@@ -36,28 +38,42 @@ function Payment() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const validateForm = () => {
-    if (!formData.fullName || !formData.phoneNumber || !formData.addressLine)
-      return toast.error("Please fill all address fields"), false;
+    if (!formData.fullName || !formData.phoneNumber || !formData.addressLine){
+      toast.error("Please fill all address fields");
+      return false;
+    }
     return true;
   };
 
   /* ================= COD ================= */
-  const handleCOD = () => {
-    const orderId = createOrder({
-      items: itemsToOrder,
-      paymentMethod: "COD",
-      totals: { subtotal, shipping, tax, grandTotal },
-      shipping: formData,
-    });
+  const handleCOD = async () => {
+    try {
+      setProcessing(true)
+      
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/orders/place`,
+      
+      {
+        paymentMethod:"COD",
+        shipping:formData,
+      },
+      { withCredentials:true }
+    );
 
-    itemsToOrder.forEach((i) => removeFromCart(i.id));
+    itemsToOrder.forEach((i) => removeFromCart(i._id));
     setSingleBuy(null);
 
     toast.success("Order placed successfully!");
-    navigate(`/track/${orderId}`);
+    navigate(`/track/${data.orderId}`);
+    } catch (error) {
+      toast.error("Failed to place order!")
+    } finally {
+      setProcessing(false);
+    }
   };
 
   /* ================= RAZORPAY ================= */
+
   const handleRazorpay = async () => {
     try {
       setProcessing(true);
@@ -76,24 +92,28 @@ function Payment() {
         order_id: data.id,
 
         handler: async function (response) {
-          await axios.post(
-            `${import.meta.env.VITE_API_URL}/api/payment/verify`,
-            response
-          );
-
-          const orderId = createOrder({
-            items: itemsToOrder,
-            paymentMethod: "RAZORPAY",
-            paymentId: response.razorpay_payment_id,
-            totals: { subtotal, shipping, tax, grandTotal },
-            shipping: formData,
-          });
-
-          itemsToOrder.forEach((i) => removeFromCart(i.id));
-          setSingleBuy(null);
-
-          toast.success("Payment successful!");
-          navigate(`/track/${orderId}`);
+          try {
+            await axios.post(
+              `${import.meta.env.VITE_API_URL}/api/payment/verify`,
+              response
+            );
+            const orderRes = await axios.post(
+              `${import.meta.env.VITE_API_URL}/orders/place`,
+              {
+                paymentMethod: "RAZORPAY",
+                paymentId: response.razorpay_payment_id,
+                shipping: formData,
+              },
+              { withCredentials: true }     
+            );
+            itemsToOrder.forEach((i) => removeFromCart(i._id));
+            setSingleBuy(null);
+            
+            toast.success("Payment successful!");
+            navigate(`/track/${orderRes.data.orderId}`);
+          } catch {
+            toast.error("Order creation failed!")
+          }
         },
 
         prefill: {
@@ -105,106 +125,126 @@ function Payment() {
       };
 
       new window.Razorpay(options).open();
-      setProcessing(false);
+    
     } catch (err) {
-      setProcessing(false);
+
       toast.error("Payment failed!");
+    } finally {
+      setProcessing(false);
     }
   };
 
   const handleSubmit = (e) => {
+    
     e.preventDefault();
     if (!validateForm()) return;
+    console.log("Selected:", formData.paymentMethod);
 
     if (formData.paymentMethod === "cod") handleCOD();
     else handleRazorpay();
   };
 
   return (
-    <div className="min-h-screen bg-white py-10 px-4">
-      <div className="max-w-4xl mx-auto">
-        <button
-          onClick={() => navigate("/cart")}
-          className="flex items-center gap-2 text-yellow-600 mb-6"
-        >
-          <ArrowLeft size={18} /> Back to Cart
-        </button>
+  <div className="payment-page">
+    <div className="payment-container">
+      <button
+        onClick={() => navigate("/cart")}
+        className="back-btn"
+      >
+        <ArrowLeft size={18} /> Back to Cart
+      </button>
 
-        <form
-          onSubmit={handleSubmit}
-          className="grid grid-cols-1 lg:grid-cols-3 gap-6"
-        >
-          {/* LEFT */}
-          <div className="lg:col-span-2 bg-white p-6 shadow rounded">
-            <h2 className="text-2xl font-bold mb-4">Shipping Address</h2>
+      <form onSubmit={handleSubmit} className="payment-grid">
 
-            {["fullName", "phoneNumber", "addressLine", "city", "zipCode"].map(
-              (f) => (
-                <input
-                  key={f}
-                  name={f}
-                  placeholder={f}
-                  onChange={handleChange}
-                  className="w-full border p-3 rounded mb-3"
-                />
-              )
+        
+        <div className="payment-card">
+          <h2 className="section-title">Shipping Address</h2>
+
+          {["fullName", "phoneNumber", "addressLine", "city", "zipCode"].map(
+            (f) => (
+              <input
+                key={f}
+                name={f}
+                placeholder={f.replace(/([A-Z])/g, " $1")}
+                onChange={handleChange}
+                className="input-field"
+              />
+            )
+          )}
+
+          <h2 className="section-title mt">Payment Method</h2>
+
+          <label className="radio-box">
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="cod"
+              checked={formData.paymentMethod === "cod"}
+              onChange={handleChange}
+            />
+            Cash on Delivery
+          </label>
+
+          <label className="radio-box">
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="online"
+              checked={formData.paymentMethod === "online"}
+              onChange={handleChange}
+            />
+            Online Payment (UPI / Card / Netbanking)
+          </label>
+
+         
+        </div>
+
+       
+        <div className="summary-card">
+          <h3 className="summary-title">Order Summary</h3>
+
+          <div className="summary-row">
+            <span>Subtotal</span>
+            <span>₹{subtotal}</span>
+          </div>
+
+          <div className="summary-row">
+            <span>Shipping</span>
+            <span>₹{shipping}</span>
+          </div>
+
+          <div className="summary-row">
+            <span>Tax (18%)</span>
+            <span>₹{tax}</span>
+          </div>
+
+          <hr />
+
+          <div className="summary-total">
+            <span>Total</span>
+            <span>₹{grandTotal}</span>
+          </div>
+           <button
+            disabled={processing}
+            className="place-order-btn"
+          >
+            {processing ? (
+              <span className="processing">
+                <Loader className="spin" /> Processing
+              </span>
+            ) : (
+              <span className="place-text">
+                <Lock size={18} /> Place Order
+              </span>
             )}
+          </button>
+        </div>
 
-            <h2 className="text-xl font-bold mt-6 mb-3">Payment Method</h2>
-
-            <label className="flex gap-2 mb-2">
-              <input
-                type="radio"
-                name="paymentMethod"
-                value="cod"
-                checked={formData.paymentMethod === "cod"}
-                onChange={handleChange}
-              />
-              Cash on Delivery
-            </label>
-
-            <label className="flex gap-2">
-              <input
-                type="radio"
-                name="paymentMethod"
-                value="online"
-                checked={formData.paymentMethod === "online"}
-                onChange={handleChange}
-              />
-              Online Payment (UPI / Card / Netbanking)
-            </label>
-
-            <button
-              disabled={processing}
-              className="w-full mt-6 bg-yellow-400 py-3 font-bold rounded"
-            >
-              {processing ? (
-                <span className="flex justify-center gap-2">
-                  <Loader className="animate-spin" /> Processing
-                </span>
-              ) : (
-                <>
-                  <Lock size={18} /> Place Order
-                </>
-              )}
-            </button>
-          </div>
-
-          {/* RIGHT */}
-          <div className="bg-white p-6 shadow rounded h-fit">
-            <h3 className="text-xl font-bold mb-4">Order Summary</h3>
-            <p>Subtotal: ₹{subtotal}</p>
-            <p>Shipping: ₹{shipping}</p>
-            <p>Tax: ₹{tax}</p>
-            <hr className="my-3" />
-            <p className="text-2xl font-bold text-yellow-600">
-              ₹{grandTotal}
-            </p>
-          </div>
-        </form>
-      </div>
+      </form>
     </div>
-  );
+  </div>
+);
+
 }
 
 export default Payment;
