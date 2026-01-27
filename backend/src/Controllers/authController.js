@@ -6,7 +6,8 @@ const jwt = require("jsonwebtoken");
 exports.registerUser = async ( req, res ) => {
    try{
      const { name, email, password } =req.body;
-    const emailLower = email.toLowerCase()
+    const emailLower = email.toLowerCase();
+
     const existingUser = await User.findOne({ email:emailLower  });
         if(existingUser){
             return res.status(400).json({ message:"User is already exists!"});
@@ -52,15 +53,15 @@ exports.loginUser = async (req, res ) => {
     res.cookie("token", token, {
       httpOnly: true,
       secure: false,        
-      sameSite: "lax",      
+      sameSite: "lax",     
+      path:"/", 
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.json({
-        token,
         message: "Login successful",       
-        user:{
-            id:user._id,
+        user: {
+            id: user._id,
             name: user.name,
             email: user.email,
             isAdmin: user.isAdmin

@@ -6,13 +6,19 @@ export const  AuthModalProvider = ({ children}) =>{
     const [showLogin, setShowLogin] = useState(false);
     const [ showSignup, setShowSignup ] = useState(false);
 
+    const [user, setUser ] = useState(
+        JSON.parse(localStorage.getItem("userInfo"))
+    )
+
     return(
         <AuthModalContext.Provider
         value={{
             showLogin,
             setShowLogin,
             showSignup,
-            setShowSignup
+            setShowSignup,
+            user,
+            setUser
         }}>
             {children}
         </AuthModalContext.Provider>

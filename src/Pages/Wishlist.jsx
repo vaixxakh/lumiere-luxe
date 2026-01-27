@@ -10,7 +10,7 @@ function Wishlist() {
 
   const handleAddToCart = (product) => {
     addToCart(product);
-    removeFromWishlist(product.id); 
+    removeFromWishlist(product._id); 
   };
 
 
@@ -48,7 +48,7 @@ function Wishlist() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {wishlist.map((product) => (
               <div
-                key={product.id}
+                key={product._id || product.id || index }
                 className="group bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 transition-all duration-300"
               >
                 {/* Product Image Container */}
@@ -85,7 +85,7 @@ function Wishlist() {
                       Add to Cart
                     </button>
                     <button
-                      onClick={() => removeFromWishlist(product.id)}
+                      onClick={() => removeFromWishlist(product._id)}
                       className="flex-1 bg-red-100 hover:bg-red-200 text-red-600 font-bold py-2.5 px-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 border border-red-300 text-sm sm:text-base"
                     >
                       <Trash2 size={16} className="sm:w-[18px] sm:h-[18px]" />

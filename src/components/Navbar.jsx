@@ -13,12 +13,11 @@ function Navbar({ onSearch = () => {} }) {
   const [searchItem, setSearchItem] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const userMenuRef = useRef(null);
   const userMenuRefMobile = useRef(null);
 
-  const { setShowLogin, setShowSignup } = useAuthModal();
+  const { user, setUser, setShowLogin, setShowSignup } = useAuthModal();
 
 
   const isProductsPage = location.pathname === "/products";
@@ -26,10 +25,6 @@ function Navbar({ onSearch = () => {} }) {
 
   const { cartCount, wishlistCount } = useCart();
 
-  useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    if (storedUser) setUser(storedUser);
-  }, []);
 
   
   const handleSearch = (e) => {
@@ -68,7 +63,7 @@ const handleHomeClick = () => {
     }
   };
    const handleLogout = () => {
-    localStorage.removeItem("user");  
+    localStorage.removeItem("userInfo");  
     setUser(null);
     setShowUserMenu(false);
     setShowLogin(true);
@@ -99,8 +94,8 @@ const handleHomeClick = () => {
           <Link to="/about" onClick={() => handleNavClick("/about")} className="hover-underline" >ABOUT</Link>
           <Link to="/products" onClick={() => handleNavClick("/products")} className="hover-underline" >SHOP BY</Link>
           <Link to="/contact" onClick={() => handleNavClick("/contact")} className="hover-underline" >CONTACT US</Link>
-          <Link to="/contact" onClick={() => handleNavClick("/contact")} className="hover-underline" >CATEGORIES</Link>
-          <Link to="/contact" onClick={() => handleNavClick("/contact")} className="hover-underline" >GALLERY</Link>
+          {/* <Link to="/contact" onClick={() => handleNavClick("/contact")} className="hover-underline" >CATEGORIES</Link>
+          <Link to="/contact" onClick={() => handleNavClick("/contact")} className="hover-underline" >GALLERY</Link> */}
         </div>
 
         {/* DESKTOP ICONS */}

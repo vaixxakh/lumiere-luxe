@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
-import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff,  } from 'lucide-react';
 import { useAuthModal } from "../Context/AuthModalContext";
 
 function Login() {
@@ -11,7 +11,7 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const { setShowLogin, setShowSignup } = useAuthModal();
+  const { setShowLogin, setShowSignup, setUser } = useAuthModal();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -28,29 +28,15 @@ function Login() {
     setLoading(true);
     setMessage('');
 
-    try {
-
-      if (email === 'admin@lumiere.com' && password === 'admin@916') {
-        localStorage.setItem('token', 'admin-token');
-        localStorage.setItem(
-          'user',
-          JSON.stringify({ email, name: 'Admin', isAdmin: true })
-        );
-
-        setMsgType('success');
-        setMessage('Welcome Admin! Login Successful!');
-        setShowLogin(false);  
-        window.location.href='/admin';
-      return;
-      }
-
+    try { 
       const res = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/auth/login`,
         { email, password },
-         { withCredentials: true }
+         { withCredentials: true },
+
       );
 
-      const { token, user } = res.data;
+      const {  user } = res.data;
 
       if (!user) {
         setMsgType('error');
@@ -66,9 +52,9 @@ function Login() {
         return;
       }
 
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-
+     
+      localStorage.setItem('userInfo', JSON.stringify(user));
+      setUser(user);  
       setMsgType('success');
       setMessage(`Welcome back, ${user.name}!`);
 

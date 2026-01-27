@@ -6,7 +6,7 @@ const {
     placeOrder,
     getMyOrders,
     getSingleOrder
-} = require("../Controllers/orderController");
+} = require("../controllers/orderController");
 
 
 router.post("/place", authMiddleware, placeOrder);

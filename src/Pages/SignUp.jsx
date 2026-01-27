@@ -1,6 +1,6 @@
   import { useState } from 'react';
   import axios from 'axios';
-  import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
+  import { Eye, EyeOff,  } from 'lucide-react';
   import { useAuthModal } from "../Context/AuthModalContext";
 
   function SignUp() {

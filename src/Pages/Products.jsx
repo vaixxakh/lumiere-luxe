@@ -32,7 +32,14 @@ const ProductsPage = ({ searchTerm }) => {
 
   const handleAddToCart = ( product) => {
     
-    addToCart(product);
+    addToCart({
+        _id: product._id,
+      name: product.name,
+      price: product.price,    
+      image: product.image,     
+    });
+    
+    
     toast.success("🛒 Item added to cart!", {
       position: "top-center",
       autoClose: 2000,
@@ -238,7 +245,7 @@ useEffect(() => {
 
 
                   {/* Action Buttons */}
-                  <div className="space-y-2">
+                  {/* <div className="space-y-2">
                     <button
                       onClick={() => handleAddToCart(product)}
                       className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-2  text-xs sm:text-sm transition-colors"
@@ -251,7 +258,7 @@ useEffect(() => {
                     >
                       Buy Now
                     </button>
-                  </div>
+                  </div> */}
                 </div>
               </motion.div>
             );

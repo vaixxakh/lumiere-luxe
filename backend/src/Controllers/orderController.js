@@ -2,14 +2,16 @@ const Order = require("../models/Order");
 const Cart = require("../models/Cart");
 
 exports.placeOrder = async (req, res) => {
+  
   try {
+   
     const userId = req.user.id;
-
+    
     const { paymentMethod = "COD", paymentId } = req.body;
 
     const cartItems = await Cart.find({ userId }).populate("productId");
 
-    if (!cartItems.length) {
+    if( !cartItems || !cartItems.length) {
       return res.status(400).json({ message: "Your cart is empty" });
     }
 
@@ -79,4 +81,5 @@ exports.getSingleOrder = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+  
 };

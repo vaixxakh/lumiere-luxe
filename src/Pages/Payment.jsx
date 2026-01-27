@@ -46,10 +46,11 @@ function Payment() {
   };
 
   /* ================= COD ================= */
+  
   const handleCOD = async () => {
     try {
       setProcessing(true)
-      
+    
       const { data } = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/orders/place`,
       
@@ -67,6 +68,7 @@ function Payment() {
     navigate(`/track/${data.orderId}`);
     } catch (error) {
       toast.error("Failed to place order!")
+      console.error("ORDER ERROR ", error.response?.data || error.message);
     } finally {
       setProcessing(false);
     }
@@ -95,10 +97,11 @@ function Payment() {
           try {
             await axios.post(
               `${import.meta.env.VITE_API_URL}/api/payment/verify`,
-              response
+              response,
+               {withCredentials: true },
             );
             const orderRes = await axios.post(
-              `${import.meta.env.VITE_API_URL}/orders/place`,
+              `${import.meta.env.VITE_API_URL}/api/orders/place`,
               {
                 paymentMethod: "RAZORPAY",
                 paymentId: response.razorpay_payment_id,

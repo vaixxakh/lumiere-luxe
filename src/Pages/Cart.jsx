@@ -15,14 +15,14 @@ function Cart() {
 
  
   const totalItems = cart.reduce(
-    (sum, item) => sum + (item.quantity || 1),
+    (sum, item) => sum + item.quantity ,
     0
   );
 
   useEffect(() => {
     const sum = cart.reduce(
       (total, item) =>
-        total + safePrice(item.price) * (item.quantity || 1),
+        total + safePrice(item.productId.price) * item.quantity,
       0
     );
     setSubtotal(sum);
@@ -76,22 +76,23 @@ function Cart() {
                   className="bg-white shadow-md p-6 flex gap-6 border"
                 >
                   <img
-                    src={item.image}
-                    alt={item.name}
+                    src={item.productId.image}
+                    alt={item.productId.name}
                     className="w-24 h-24 object-cover rounded-lg"
                   />
 
                   <div className="flex-1">
-                    <h3 className="font-bold text-lg">{item.name}</h3>
+                    <h3 className="font-bold text-lg">{item.productId.name}</h3>
                     <p className="text-yellow-600 font-bold text-xl mt-1">
-                      ₹{safePrice(item.price).toLocaleString()}
+                      ₹{(safePrice(item.productId.price) * item.quantity).toLocaleString()}
                     </p>
 
                     {/* Quantity */}
                     <div className="flex items-center gap-2 mt-4">
                       <button
                         onClick={() =>
-                          updateQuantity(item._id || item.id, item.quantity - 1)
+                          item.quantity > 1 &&
+                          updateQuantity(item._id, item.quantity -1 )
                         }
                         className="bg-gray-200 p-2 rounded-lg"
                       >
@@ -117,10 +118,8 @@ function Cart() {
                     <div>
                       <p className="text-sm text-gray-600">Subtotal</p>
                       <p className="font-bold text-lg">
-                        ₹
-                        {(
-                          safePrice(item.price) * item.quantity
-                        ).toLocaleString()}
+                        
+                       ₹{(safePrice(item.productId.price) * item.quantity).toLocaleString()}
                       </p>
                     </div>
 
