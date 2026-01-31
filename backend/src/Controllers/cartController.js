@@ -1,5 +1,6 @@
 const Cart = require("../models/Cart");
 
+
 exports.addToCart = async (req, res ) => {
     try {
 
@@ -19,7 +20,10 @@ exports.addToCart = async (req, res ) => {
              });
         }
     
-        const cart = await Cart.find({ userId }).populate("productId")
+        const cart = await Cart.find({ userId })
+        .populate("productId")
+        .sort({ createdAt: -1 })
+        
     res.json(cart);
     } catch (error) {
         res.status(500).json({ message: "Add to cart failed" })
@@ -28,7 +32,10 @@ exports.addToCart = async (req, res ) => {
 
 exports.getCart = async (req, res) => {
     try {
-        const cart = await Cart.find({ userId: req.user.id }).populate("productId");
+        const cart = await Cart.find({ userId: req.user.id })
+        .populate("productId")
+        .sort({ createedAt: -1 });
+
         res.json(cart);
     } catch (error) {
         res.status(500).json({ message : "Fetch cart failed"})
@@ -37,7 +44,8 @@ exports.getCart = async (req, res) => {
 
 exports.removeFromCart = async (req, res) => {
     try {
-        const { productId } = req.body;
+       
+        const { productId } = req.params;
 
         await Cart.deleteOne({ 
             userId: req.user.id, 
@@ -66,10 +74,12 @@ exports.clearCart = async (req, res) => {
 };
 exports.updateCartQty = async (req, res) => {
     try {
+        
         const { quantity } = req.body;
+        const { productId } = req.params;
       
-        await Cart.findByIdAndUpdate(
-            req.params.id, 
+        await Cart.findOneAndUpdate(
+            { userId: req.user.id, productId },
             { quantity: Number(quantity)},
             { new: true }
         );
@@ -82,3 +92,5 @@ exports.updateCartQty = async (req, res) => {
         res.status(500).json({  message: "Update quantity failed" })
     }
 };
+
+

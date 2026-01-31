@@ -7,10 +7,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import SkeletonCard from "../components/SkeletonCard";
 
-// import Spinner from "../components/Spinner";
-
 const ProductsPage = ({ searchTerm }) => {
-  const { addToWishlist, removeFromWishlist, isWishlisted, addToCart, setSingleBuy } = useCart();
+  const { addToWishlist, removeFromWishlist, isWishlisted, addToCart,  } = useCart();
   const [allProducts, setAllProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortOrder, setSortOrder] = useState("none");

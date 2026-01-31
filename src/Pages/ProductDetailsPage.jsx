@@ -2,21 +2,13 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import {
-      Heart, 
-      ShoppingCart, 
-      Star,
-      Truck,
-      Shield,
-      RefreshCw,
-      ArrowLeft,
-      Plus,
-      Minus
-     } from 'lucide-react';
+import {Heart, ShoppingCart, Star,Truck,Shield,RefreshCw,Plus,Minus} from 'lucide-react';
 import { useCart } from '../Context/CartContext';
 import { toast } from 'react-toastify';
+import "../Pages/ProductDetailsPage.css"
 
 const ProductDetailsPage = () => {
+
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -24,8 +16,7 @@ const ProductDetailsPage = () => {
     addToCart, 
     addToWishlist, 
     removeFromWishlist, 
-    isWishlisted, 
-    setSingleBuy 
+    isWishlisted,  
   } = useCart();
   
   const [product, setProduct] = useState(null);
@@ -35,6 +26,7 @@ const ProductDetailsPage = () => {
 
   const token = localStorage.getItem("token");
 
+   /* ================= FETCH PRODUCT ================= */
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
@@ -50,10 +42,13 @@ const ProductDetailsPage = () => {
       });
   }, [id, navigate]);
 
+/* ================= CART ================= */
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
+
     const productWithQuantity = { ...product, quantity };
-    addToCart(productWithQuantity);
+    await addToCart(productWithQuantity);
+
     toast.success(`🛒 ${quantity} item(s) added to cart!`, {
       position: 'top-center',
       autoClose: 2000,
@@ -61,9 +56,9 @@ const ProductDetailsPage = () => {
     });
   };
 
-  const handleBuyNow = () => {
+  const handleBuyNow = async () => {
     const productWithQuantity = { ...product, quantity };
-    setSingleBuy(productWithQuantity);
+    await  addToCart(productWithQuantity);
     navigate('/payment');
   };
 
@@ -72,22 +67,26 @@ const wishlisted = productId ? isWishlisted(productId) : false;
 
 
   const handleWishlist = () => {
+
     if(!token) {
       toast.error("Please login first!")
       return;
-      
     }
+
     if(wishlisted) {
       removeFromWishlist(productId);
-      toast.info("Remove from wishlist")
     } else {
       addToWishlist(product);
       toast.success("Added to wishlist")
     }
   };
 
+  /* ================= QUANTITY ================= */
+
   const incrementQuantity = () => setQuantity(q => q + 1);
   const decrementQuantity = () => setQuantity(q => Math.max(1, q - 1));
+
+    /* ================= LOADING ================= */
 
   if (loading) {
     return (
@@ -108,28 +107,18 @@ const wishlisted = productId ? isWishlisted(productId) : false;
     );
   }
  
-
+ /* ================= IMAGES ================= */
 
   const productImages = [
     product.image, 
     product.image, 
-    product.image
+    product.image,
+
   ];
 
   return (
-    <div className="min-h-screen bg-white py-8 sm:py-12">
+    <div className="min-h-screen bg-white py-8 sm:py-12 container">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      
-        <motion.button
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          onClick={() => navigate('/products')}
-          className="flex items-center gap-2 text-gray-600 hover:text-black mb-6 font-semibold"
-        >
-          <ArrowLeft size={20} />
-          Back to Products
-        </motion.button>
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Left Side - Images */}
           <motion.div
@@ -146,15 +135,35 @@ const wishlisted = productId ? isWishlisted(productId) : false;
               />
               
               {/* Wishlist Button */}
-              <button
+            
+             <button
                 onClick={handleWishlist}
-                className="absolute top-4 right-4 bg-white rounded-full p-3 shadow-lg hover:shadow-xl transition-shadow"
+                className="
+                  absolute top-4 right-4
+                  rounded-full
+                  p-3
+                
+                  border-gray-300
+                  bg-transparent
+                  transition-all
+                  duration-300
+                  hover:border-red-400
+                  active:scale-90
+                "
               >
                 <Heart
                   size={24}
-                  className={`${
-                    wishlisted ? 'text-red-500 fill-red-500' : 'text-gray-400'
-                  }`}
+                  className={`
+                    cursor-pointer hover:text-red-600 transition
+                    transition-all
+                    duration-300
+                    ease-in-out
+                    ${
+                      wishlisted
+                        ? 'text-red-500 fill-red-600 scale-110'
+                        : 'text-gray-400 fill-transparent'
+                    }
+                  `}
                 />
               </button>
             </div>
@@ -278,7 +287,7 @@ const wishlisted = productId ? isWishlisted(productId) : false;
             </div>
 
             {/* Features */}
-            <div className="border-t border-gray-200 pt-6">
+            <div className="border-t border-gray-200 pt-6 ">
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
                   <Truck className="text-green-600 flex-shrink-0 mt-1" size={20} />

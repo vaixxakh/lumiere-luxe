@@ -92,7 +92,7 @@ function Cart() {
                       <button
                         onClick={() =>
                           item.quantity > 1 &&
-                          updateQuantity(item._id, item.quantity -1 )
+                          updateQuantity(item.productId._id, item.quantity -1 )
                         }
                         className="bg-gray-200 p-2 rounded-lg"
                       >
@@ -105,7 +105,7 @@ function Cart() {
 
                       <button
                         onClick={() =>
-                          updateQuantity(item._id || item.id, item.quantity + 1)
+                          updateQuantity(item.productId._id , item.quantity + 1)
                         }
                         className="bg-gray-200 p-2 rounded-lg"
                       >
@@ -125,7 +125,7 @@ function Cart() {
 
                     <button
                       onClick={() =>
-                        removeFromCart(item._id || item.id)
+                        removeFromCart(item.productId._id )
                       }
                       className="text-red-500 hover:bg-red-100 p-2 r"
                     >

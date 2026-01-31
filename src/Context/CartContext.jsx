@@ -13,7 +13,7 @@ export const CartProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : [];
   });
 
-  const [singleBuy, setSingleBuy] = useState(null);
+
 
   /* ================= HELPERS ================= */
   const normalizePrice = (price) => {
@@ -48,21 +48,21 @@ export const CartProvider = ({ children }) => {
         { withCredentials: true }
       );
 
-      setCart(res.data.cart);
+      setCart(res.data || []);
     } catch (err) {
       console.error("ADD TO CART ERROR", err.response?.data || err.message);
     }
   };
 
   /* ================= REMOVE FROM CART ================= */
-  const removeFromCart = async (cartId) => {
+  const removeFromCart = async (productId) => {
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/cart/remove/${cartId}`,
+      const res = await axios.delete(
+        `${import.meta.env.VITE_API_URL}/api/cart/${productId}`,
         { withCredentials: true }
       );
 
-      setCart(res.data.cart);
+      setCart(res.data || []);
     } catch (err) {
       console.error("REMOVE CART ERROR", err.response?.data || err.message);
     }
@@ -71,13 +71,13 @@ export const CartProvider = ({ children }) => {
   /* ================= UPDATE QUANTITY ================= */
   const updateQuantity = async (productId, quantity) => {
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/cart/update`,
-        { productId, quantity },
+      const res = await axios.put(
+        `${import.meta.env.VITE_API_URL}/api/cart/${productId}`,
+        { quantity },
         { withCredentials: true }
       );
 
-      setCart(res.data.cart);
+      setCart(res.data || []);
     } catch (err) {
       console.error("UPDATE QTY ERROR", err.response?.data || err.message);
     }
@@ -86,7 +86,7 @@ export const CartProvider = ({ children }) => {
   /* ================= CLEAR CART ================= */
   const clearCart = async () => {
     try {
-      await axios.post(
+      await axios.delete(
         `${import.meta.env.VITE_API_URL}/api/cart/clear`,
         {},
         { withCredentials: true }
@@ -115,14 +115,15 @@ export const CartProvider = ({ children }) => {
   };
 
   /* ================= TOTALS ================= */
-  const cartTotal = cart.reduce(
+  const safeCart = Array.isArray(cart) ? cart: [];
+  const cartTotal = safeCart.reduce(
     (sum, item) =>
       sum + normalizePrice(item.productId?.price) * (item.quantity || 1),
     0
   );
 
-  const cartCount = cart.reduce(
-    (sum, item) => sum + item.quantity,
+  const cartCount = safeCart.reduce(
+    (sum, item) => sum + (item.quantity || 0 ),
     0
   );
 
@@ -153,9 +154,7 @@ export const CartProvider = ({ children }) => {
         moveToCart,
         cartTotal,
         cartCount,
-        wishlistCount,
-        singleBuy,
-        setSingleBuy,
+        wishlistCount
       }}
     >
       {children}

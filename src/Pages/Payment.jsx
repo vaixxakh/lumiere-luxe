@@ -8,7 +8,7 @@ import "./Payment.css"
 
 function Payment() {
   const navigate = useNavigate();
-  const { cart, removeFromCart, singleBuy, setSingleBuy } = useCart();
+  const { cart } = useCart();
 
   const [processing, setProcessing] = useState(false);
 
@@ -18,21 +18,24 @@ function Payment() {
     addressLine: "",
     city: "",
     zipCode: "",
-    paymentMethod: "cod",
+    paymentMethod: "COD",
   });
 
-  const itemsToOrder = singleBuy
-    ? [{ ...singleBuy, quantity: singleBuy.quantity || 1 }]
-    : cart;
+   /* ================= CART ITEMS ================= */
+
+  const itemsToOrder = cart;
 
   const subtotal = itemsToOrder.reduce(
-    (sum, i) => sum + Number(i.price) * i.quantity,
+    (sum, i) => 
+      sum + Number(i.productId?.price || i.price) * i.quantity,
     0
   );
 
-  const shipping = 50;
-  const tax = Math.round(subtotal * 0.18);
-  const grandTotal = subtotal + shipping + tax;
+  const shippingCharge = 50;
+  const tax = Math.round(subtotal * 0.03);
+  const grandTotal = subtotal + shippingCharge + tax;
+  
+  /* ================= FORM ================= */
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -48,24 +51,22 @@ function Payment() {
   /* ================= COD ================= */
   
   const handleCOD = async () => {
+
     try {
       setProcessing(true)
     
       const { data } = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/orders/place`,
-      
       {
         paymentMethod:"COD",
-        shipping:formData,
+        shippingAddress:formData,
       },
       { withCredentials:true }
     );
 
-    itemsToOrder.forEach((i) => removeFromCart(i._id));
-    setSingleBuy(null);
-
     toast.success("Order placed successfully!");
     navigate(`/track/${data.orderId}`);
+
     } catch (error) {
       toast.error("Failed to place order!")
       console.error("ORDER ERROR ", error.response?.data || error.message);
@@ -100,17 +101,16 @@ function Payment() {
               response,
                {withCredentials: true },
             );
+
             const orderRes = await axios.post(
               `${import.meta.env.VITE_API_URL}/api/orders/place`,
               {
                 paymentMethod: "RAZORPAY",
                 paymentId: response.razorpay_payment_id,
-                shipping: formData,
+                shippingAddress: formData,
               },
               { withCredentials: true }     
             );
-            itemsToOrder.forEach((i) => removeFromCart(i._id));
-            setSingleBuy(null);
             
             toast.success("Payment successful!");
             navigate(`/track/${orderRes.data.orderId}`);
@@ -123,7 +123,6 @@ function Payment() {
           name: formData.fullName,
           contact: formData.phoneNumber,
         },
-
         theme: { color: "#e8c22b" },
       };
 
@@ -137,29 +136,23 @@ function Payment() {
     }
   };
 
+  /* ================= SUBMIT ================= */
+
   const handleSubmit = (e) => {
-    
+
     e.preventDefault();
     if (!validateForm()) return;
-    console.log("Selected:", formData.paymentMethod);
 
-    if (formData.paymentMethod === "cod") handleCOD();
+    if (formData.paymentMethod === "COD") handleCOD();
     else handleRazorpay();
   };
+
+  /* ================= UI ================= */
 
   return (
   <div className="payment-page">
     <div className="payment-container">
-      <button
-        onClick={() => navigate("/cart")}
-        className="back-btn"
-      >
-        <ArrowLeft size={18} /> Back to Cart
-      </button>
-
       <form onSubmit={handleSubmit} className="payment-grid">
-
-        
         <div className="payment-card">
           <h2 className="section-title">Shipping Address</h2>
 
@@ -181,8 +174,8 @@ function Payment() {
             <input
               type="radio"
               name="paymentMethod"
-              value="cod"
-              checked={formData.paymentMethod === "cod"}
+              value="COD"
+              checked={formData.paymentMethod === "COD"}
               onChange={handleChange}
             />
             Cash on Delivery
@@ -192,8 +185,8 @@ function Payment() {
             <input
               type="radio"
               name="paymentMethod"
-              value="online"
-              checked={formData.paymentMethod === "online"}
+              value="RAZORPAY"
+              checked={formData.paymentMethod === "RAZORPAY"}
               onChange={handleChange}
             />
             Online Payment (UPI / Card / Netbanking)
@@ -213,11 +206,11 @@ function Payment() {
 
           <div className="summary-row">
             <span>Shipping</span>
-            <span>₹{shipping}</span>
+            <span>₹{shippingCharge}</span>
           </div>
 
           <div className="summary-row">
-            <span>Tax (18%)</span>
+            <span>Tax (3%)</span>
             <span>₹{tax}</span>
           </div>
 

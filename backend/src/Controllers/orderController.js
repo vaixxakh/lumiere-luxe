@@ -7,9 +7,13 @@ exports.placeOrder = async (req, res) => {
    
     const userId = req.user.id;
     
-    const { paymentMethod = "COD", paymentId } = req.body;
+    const { paymentMethod = "COD", paymentId, shippingAddress } = req.body;
 
     const cartItems = await Cart.find({ userId }).populate("productId");
+
+    if(!shippingAddress || !shippingAddress.fullName || !shippingAddress.phoneNumber  ){
+      return res.status(400).json({ message: "Shipping address is required"})
+    }
 
     if( !cartItems || !cartItems.length) {
       return res.status(400).json({ message: "Your cart is empty" });
@@ -27,7 +31,7 @@ exports.placeOrder = async (req, res) => {
       0
     );
 
-    const shipping = 100;
+    const shippingCharge = 50;
     const tax = Math.round(subtotal * 0.18);
     const total = subtotal + shipping + tax;
 
@@ -36,6 +40,7 @@ exports.placeOrder = async (req, res) => {
       items,
       subtotal,
       shipping,
+      shippingAddress,
       tax,
       total,
       paymentMethod,

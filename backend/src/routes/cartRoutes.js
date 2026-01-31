@@ -12,8 +12,8 @@ const {
 
 router.post("/add", auth, addToCart);
 router.get("/", auth, getCart);
-router.put("/:id", auth, updateCartQty);
-router.delete("/:id", auth, removeFromCart);
+router.put("/:productId", auth, updateCartQty);
+router.delete("/:productId", auth, removeFromCart);
 router.delete("/", auth, clearCart);
 
 
