@@ -1,85 +1,65 @@
-import axios from 'axios';
+import  axios from "axios";
 
 const API = axios.create({
-  baseURL: 'https://lumiere-luxe-json-server-omega.vercel.app/api', 
-  headers: { 'Content-Type': 'application/json' },
-});
-// PRODUCTS
-export const getProducts = () => API.get('/products');
-export const createProduct = (payload) => API.post('/products', {
-  ...payload,
-  id: Date.now().toString(),
-  reviews: 4.5,
-  createdAt: new Date().toISOString(),
-});
-export const updateProduct = (id, payload) => API.put(`/products/${id}`, {
-  ...payload,
-  updatedAt: new Date().toISOString(),
-});
-export const deleteProduct = (id) => API.delete(`/products/${id}`);
-export const archiveProduct = (id) => API.patch(`/products/${id}`, {
-  archived: true,
-  archivedAt: new Date().toISOString(),
+  baseURL: import.meta.env.VITE_API_URL,
+  withCredentials: true,
+  headers: {
+    "Content-Type": "application/json"
+  },
 });
 
-// ORDERS 
-export const getOrders = async () => {
-  try {
-    return await API.get('/orders');
-  } catch {
-    return { data: [] };
+API.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if(token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject( error )
+)
+
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const message = 
+      error?.response?.data?.message ||
+      error?.message ||
+      "Something went wrong";
+      console.log("API Error", message)
+      return Promise.reject(error)
+
   }
-};
-export const updateOrder = (id, payload) => API.patch(`/orders/${id}`, {
-  ...payload,
-  updatedAt: new Date().toISOString(),
-});
+);
+
+export const getProducts = () => API.get("/products");
+export const getProductById = (id) => API.get(`/products/${id}`);
+export const createProduct = (payload) => API.post("/products", payload);
+export const updateProduct = (id, payload) =>
+  API.put(`/products/${id}`, payload);
+export const deleteProduct = (id) => API.delete(`/products/${id}`);
+export const archiveProduct = (id) =>
+  API.patch(`/products/${id}/archive`);
+
+export const getOrders = () => API.get("/orders");
+export const getOrderById = (id) => API.get(`/orders/${id}`);
+export const updateOrderStatus = (id, status) =>
+  API.patch(`/orders/${id}/status`, { status });
 export const deleteOrder = (id) => API.delete(`/orders/${id}`);
 
-// USERS 
-export const getUsers = () => API.get('/users');
-export const blockUser = (id) => API.patch(`/users/${id}`, {
-  blocked: true,
-  blockedAt: new Date().toISOString(),
-});
-export const unblockUser = (id) => API.patch(`/users/${id}`, {
-  blocked: false,
-  unblockedAt: new Date().toISOString(),
-});
+export const getUsers = () => API.get("/users");
+export const blockUser = (id) => API.patch(`/users/${id}/block`);
+export const unblockUser = (id) => API.patch(`/users/${id}/unblock`);
 export const deleteUser = (id) => API.delete(`/users/${id}`);
 
-// DASHBOARD STATS 
-export const getDashboardStats = async () => {
-  try {
-    const [productsRes, ordersRes, usersRes] = await Promise.all([
-      getProducts(),
-      getOrders(),
-      getUsers(),
-    ]);
+export const loginUser = (payload) =>
+  API.post("/auth/login", payload);
+export const registerUser = (payload) =>
+  API.post("/auth/register", payload);
+export const logoutUser = () => API.post("/auth/logout");
+export const getProfile = () => API.get("/auth/me");
 
-    const products = productsRes.data || [];
-    const orders = ordersRes.data || [];
-    const users = usersRes.data || [];
-    const totalRevenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
-
-    return {
-      data: {
-        totalProducts: products.length,
-        totalOrders: orders.length,
-        totalUsers: users.length,
-        totalRevenue,
-        recentOrders: orders.slice(-5).reverse(),
-        recentUsers: users.slice(-5).reverse(),
-        pendingOrders: orders.filter(o => o.status === 'Pending').length,
-        processingOrders: orders.filter(o => o.status === 'Processing').length,
-        shippedOrders: orders.filter(o => o.status === 'Shipped').length,
-        deliveredOrders: orders.filter(o => o.status === 'Delivered').length,
-      },
-    };
-  } catch (error) {
-    console.error('Error fetching stats:', error);
-    throw error;
-  }
-};
+export const getDashboardStats = () =>
+  API.get("/admin/dashboard-stats");
 
 export default API;

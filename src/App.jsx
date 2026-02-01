@@ -37,22 +37,6 @@ import AdminRoute from "./components/AdminRoute";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
-/* =========================
-   ADMIN PROTECTED ROUTE
-========================= */
-const AdminProtected = ({ children }) => {
-  const adminToken = localStorage.getItem("adminToken");
-
-  if (!adminToken || adminToken !== "true") {
-    toast.error("Admin access required", {
-      position: "top-center",
-      autoClose: 2000,
-    });
-    return <Navigate to="/admin/login" replace />;
-  }
-
-  return children;
-};
 
 /* =========================
    LAYOUT
@@ -169,11 +153,11 @@ function AppInner() {
 
           {/* ADMIN */}
           <Route
-            path="/admin"
+            path="/admin/dashboard"
             element={
-              <AdminProtected>
+              <AdminRoute>
                 <AdminLayout />
-              </AdminProtected>
+              </AdminRoute>
             }
           >
             <Route

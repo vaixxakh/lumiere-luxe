@@ -2,6 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import { Eye, EyeOff,  } from 'lucide-react';
 import { useAuthModal } from "../Context/AuthModalContext";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
   const [email, setEmail] = useState('');
@@ -11,7 +12,10 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const navigate = useNavigate();
+
   const { setShowLogin, setShowSignup, setUser } = useAuthModal();
+
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -25,10 +29,10 @@ function Login() {
       return;
     }
 
+    try { 
     setLoading(true);
     setMessage('');
 
-    try { 
       const res = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/auth/login`,
         { email, password },
@@ -36,30 +40,23 @@ function Login() {
 
       );
 
-      const {  user } = res.data;
-
-      if (!user) {
-        setMsgType('error');
-        setMessage('User not found');
-        setLoading(false);
-        return;
-      }
-
-      if (user.blocked) {
-        setMsgType('error');
-        setMessage('Your account has been blocked. Please contact support.');
-        setLoading(false);
-        return;
-      }
-
+      const user  = res.data.user;
      
       localStorage.setItem('userInfo', JSON.stringify(user));
       setUser(user);  
+
       setMsgType('success');
       setMessage(`Welcome back, ${user.name}!`);
 
         setTimeout(() => {
         setShowLogin(false); 
+
+          if(user.isAdmin){
+            navigate("/admin/dashboard");
+          } else {
+            navigate("/")
+          }
+
       }, 800)
 
     } catch (error) {

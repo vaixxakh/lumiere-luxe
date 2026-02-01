@@ -6,7 +6,11 @@ exports.adminLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        const user = await User.findOne({ email }).select("+password");
+        const user = await User.findOne({ 
+            email: email.toLowerCase(),
+            isDeleted: false
+        })
+        .select("+password");
         if(!user) {
             return res.status(401).json({ message: "Invalid credentials"})
         }
@@ -25,7 +29,7 @@ exports.adminLogin = async (req, res) => {
         }
 
         const token = jwt.sign(
-            { id: user._id},
+            { id: user._id, isAdmin: user.isAdmin},
             process.env.JWT_SECRET,
             { expiresIn: process.env.JWT_EXPIRES }
         )
@@ -40,6 +44,7 @@ exports.adminLogin = async (req, res) => {
             },
         });
     } catch (err) {
+        console.error("LOGIN ERROR:", err);
         res.status(500).json({ message: "Server error"})
     }
 
@@ -49,8 +54,12 @@ exports.registerUser = async ( req, res ) => {
    try{
      const { name, email, password } =req.body;
     const emailLower = email.toLowerCase();
-
-    const existingUser = await User.findOne({ email:emailLower  });
+    
+    const existingUser = await User.findOne({ 
+        email:emailLower,
+        isDeleted: false
+         });
+            
         if(existingUser){
             return res.status(400).json({ message:"User is already exists!"});
         }
@@ -62,7 +71,7 @@ exports.registerUser = async ( req, res ) => {
 
         const user = await User.create({
             name,
-            email,
+            email: emailLower,
             password: hashedPassword
         });  
 
@@ -78,7 +87,10 @@ exports.loginUser = async (req, res ) => {
     
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email: email.toLowerCase() })
+    const user = await User.findOne({ 
+        email: email.toLowerCase(),
+        isDeleted: false
+     })
     .select("+password");
  
     if(!user){
@@ -88,6 +100,10 @@ exports.loginUser = async (req, res ) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if(!isMatch){
         return res.status(400).json({ message:"Invalid email or password!"})
+    }
+
+    if(user.blocked) {
+        return res.status(403).json({ message: "Account blocked"})
     }
 
     const token = jwt.sign(

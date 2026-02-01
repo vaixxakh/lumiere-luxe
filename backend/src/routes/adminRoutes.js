@@ -1,6 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const adminAuth = require("../middlewares/adminMiddleware");
+
+const { protect, adminOnly } = require("../middlewares/adminMiddleware");
+
+const { getDashboardSats } = require("../controller/adminDashboardController");
 
 const {
     addProduct,
@@ -9,9 +12,14 @@ const {
     deleteProduct
 } = require("../controllers/adminProductController");
 
-router.post("/product", adminAuth, addProduct);
-router.get("/products", adminAuth, getAllProducts);
-router.put("/product/:id", adminAuth, updateProduct);
-router.delete("/product/:id", adminAuth, deleteProduct);
+router.use(protect, adminOnly);
+
+router.get("/dashboard", getDashboardSats)
+
+router.post("/product", addProduct);
+router.get("/products", getAllProducts);
+router.put("/product/:id",  updateProduct);
+router.delete("/product/:id", deleteProduct);
+
 
 module.exports = router;

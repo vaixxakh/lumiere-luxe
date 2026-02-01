@@ -130,8 +130,6 @@ useEffect(() => {
 
   }
 
-   
-  
   return (
     
     <section className="py-20 sm:py-24 md:py-32 bg-white min-h-screen">

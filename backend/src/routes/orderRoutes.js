@@ -9,9 +9,9 @@ const {
 } = require("../controllers/orderController");
 
 
-router.post("/place", authMiddleware, placeOrder);
 
 router.get("/my-orders",authMiddleware, getMyOrders);
+router.post("/", authMiddleware, placeOrder);
 
 router.get("/:orderId", authMiddleware, getSingleOrder);
 
