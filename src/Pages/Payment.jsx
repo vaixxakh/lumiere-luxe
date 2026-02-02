@@ -103,7 +103,7 @@ function Payment() {
             );
 
             const orderRes = await axios.post(
-              `${import.meta.env.VITE_API_URL}/api/orders/place`,
+              `${import.meta.env.VITE_API_URL}/orders/place`,
               {
                 paymentMethod: "RAZORPAY",
                 paymentId: response.razorpay_payment_id,

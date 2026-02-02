@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import  { useEffect, useState } from 'react';
 import { getDashboardStats } from '../Services/adminApi';
 import { Package, ShoppingBag, Users, DollarSign, TrendingUp, Calendar, AlertCircle, CheckCircle } from 'lucide-react';
 
@@ -6,18 +6,21 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    getDashboardStats()
-      .then(res => {
+useEffect(() => {
+  const fetchStats = async () => {
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/admin/dashboard`,
+        {withCredentials: true}
+      );
       setStats(res.data);
       setLoading(false);
-    })
-      .catch(err => {
-        console.error('Error:', err);
-        setLoading(false);
-      });
-  }, []);
-
+    } catch (err){
+      setLoading(false);
+    }
+  };
+   fetchStats();
+}, []);
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -39,7 +42,7 @@ const AdminDashboard = () => {
     );
   }
 
-  // Stat Card Component
+
   const StatCard = ({ icon: Icon, title, value, color, bgGradient }) => (
     <div className={`${bgGradient} text-white rounded-xl shadow-lg p-6 transform hover:scale-105 transition-transform duration-300`}>
       <div className="flex items-center justify-between mb-4">
@@ -68,13 +71,20 @@ const AdminDashboard = () => {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
+    
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-4xl font-bold text-gray-800">Dashboard Overview</h1>
           <p className="text-gray-600 mt-2 flex items-center gap-2">
             <Calendar size={16} />
-            {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            {new Date().toLocaleDateString(
+              'en-US',
+               { weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric' 
+                })
+              }
           </p>
         </div>
         <div className="text-right">
@@ -83,7 +93,7 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Main Stats Grid */}
+     
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard icon={Package} title="Products" value={stats.totalProducts} color="blue" 
         bgGradient="bg-gradient-to-br from-blue-500 to-blue-600"/>
@@ -96,7 +106,7 @@ const AdminDashboard = () => {
          bgGradient="bg-gradient-to-br from-yellow-500 to-yellow-600"/>
       </div>
 
-      {/* Order Status Summary */}
+     
       <div className="bg-white rounded-xl shadow-lg p-8">
         <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
           <TrendingUp size={28} className="text-yellow-500" />
@@ -122,9 +132,9 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Recent Orders & Users */}
+    
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Orders */}
+      
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6">
             <h2 className="text-2xl font-bold flex items-center gap-2">

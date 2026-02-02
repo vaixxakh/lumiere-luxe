@@ -1,6 +1,6 @@
-import { useState,useEffect } from "react";
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
+import { useState, useEffect } from "react";
+import { Routes, Route, useLocation } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import { AuthModalProvider } from "./Context/AuthModalContext";
@@ -34,20 +34,15 @@ import AdminProducts from "./Pages/admin/AdminProducts";
 import AdminOrders from "./Pages/admin/AdminOrders";
 import AdminUsers from "./Pages/admin/AdminUsers";
 import AdminRoute from "./components/AdminRoute";
-
 import ProtectedRoute from "./components/ProtectedRoute";
 
-
-/* =========================
-   LAYOUT
-========================= */
+/* =============== LAYOUT =============== */
 const Layout = ({ children }) => {
   const location = useLocation();
 
   const NO_LAYOUT_PAGES = [
     "/login",
     "/signup",
-    "/admin/login",
     "/payment",
     "/account",
   ];
@@ -64,9 +59,6 @@ const Layout = ({ children }) => {
   );
 };
 
-/* =========================
-   APP INNER (ROUTES + MODALS)
-========================= */
 function AppInner() {
   const location = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
@@ -78,19 +70,10 @@ function AppInner() {
     setShowSignup,
   } = useAuthModal();
 
-  const handleSearch = (term) => setSearchTerm(term);
-
- useEffect(() => {
-        if(showLogin || showSignup){
-            document.body.style.overflow = "hidden";
-        } else {
-            document.body.style.overflow = "auto";
-        }
-
-        return  () => {
-            document.body.style.overflow = "auto";
-        };
-    }, [showLogin, showSignup])
+  useEffect(() => {
+    document.body.style.overflow =
+      showLogin || showSignup ? "hidden" : "auto";
+  }, [showLogin, showSignup]);
 
   return (
     <>
@@ -103,11 +86,13 @@ function AppInner() {
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/collections" element={<LuxuryProducts />} />
-          <Route path="/products" element={<Products searchTerm={searchTerm} />} />
+          <Route
+            path="/products"
+            element={<Products searchTerm={searchTerm} />}
+          />
           <Route path="/product/:id" element={<ProductDetailsPage />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/track/:orderId" element={<OrderTrack />} />
-
 
           {/* PROTECTED */}
           <Route
@@ -151,55 +136,29 @@ function AppInner() {
             }
           />
 
-          {/* ADMIN */}
+          {/* ======== ADMIN ROUTES (CORRECTED) ======== */}
           <Route
-            path="/admin/dashboard"
-            element={
-              <AdminRoute>
-                <AdminLayout />
-              </AdminRoute>
-            }
-          >
-            <Route
-              index
-              element={
-                <AdminRoute>
-                  <AdminDashboard />
-                </AdminRoute>
-              }
-            />
-            <Route
-              path="products"
-              element={
-                <AdminRoute>
-                  <AdminProducts />
-                </AdminRoute>
-              }
-            />
-            <Route
-              path="orders"
-              element={
-                <AdminRoute>
-                  <AdminOrders />
-                </AdminRoute>
-              }
-            />
-            <Route
-              path="users"
-              element={
-                <AdminRoute>
-                  <AdminUsers />
-                </AdminRoute>
-              }
-            />
-          </Route>
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminLayout />
+            </AdminRoute>
+          }
+        >
+          <Route index element={<AdminDashboard />} />
+          <Route path="products" element={<AdminProducts />} />
+          <Route path="orders" element={<AdminOrders />} />
+          <Route path="users" element={<AdminUsers />} />
+        </Route>
 
           {/* 404 */}
           <Route
             path="*"
             element={
               <div className="min-h-screen flex items-center justify-center">
-                <h1 className="text-4xl font-bold text-red-500">404 Page Not Found</h1>
+                <h1 className="text-4xl font-bold text-red-500">
+                  404 Page Not Found
+                </h1>
               </div>
             }
           />
@@ -237,10 +196,7 @@ function AppInner() {
   );
 }
 
-/* =========================
-   MAIN APP
-========================= */
-
+/* =============== MAIN APP =============== */
 export default function App() {
   return (
     <AuthModalProvider>
@@ -248,4 +204,3 @@ export default function App() {
     </AuthModalProvider>
   );
 }
-

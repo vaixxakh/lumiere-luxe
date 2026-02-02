@@ -25,7 +25,7 @@ function Orders() {
   const fetchUserOrders = async () => {
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/orders/my-orders`,
+        `${import.meta.env.VITE_API_URL}/orders/my-orders`,
         { withCredentials: true }
       );
 

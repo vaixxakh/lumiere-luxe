@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getOrders, updateOrder } from '../Services/adminApi';
+import { getOrders, updateOrderStatus } from '../Services/adminApi';
 import { ShoppingBag, MapPin, Mail, User, Truck, CheckCircle, Clock, AlertCircle, Eye, DownloadCloud, X, Phone } from 'lucide-react';
 
 
@@ -54,7 +54,7 @@ const AdminOrders = () => {
 
 
     try {
-      // Look for both orderId and id
+    
       const order = orders.find((o) => o.orderId === orderId || o.id === orderId);
       if (!order) throw new Error('Order not found');
       
@@ -62,10 +62,10 @@ const AdminOrders = () => {
       const dbId = order.id || order.orderId;
       await updateOrder(dbId, { ...order, status });
       
-      const updatedOrders = orders.map(o =>
+      const updateOrderStatus = orders.map(o =>
         (o.orderId === orderId || o.id === orderId) ? { ...o, status } : o
       );
-      setOrders(updatedOrders);
+      setOrders(updateOrderStatus);
 
 
       if (selected && (selected.orderId === orderId || selected.id === orderId)) {

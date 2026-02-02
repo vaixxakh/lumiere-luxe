@@ -20,7 +20,7 @@ function OrderTrack() {
   const navigate = useNavigate();
   const [orderStatus, setOrderStatus] = useState(0);
 
-  //  Load from context OR fallback to localStorage for Vercel refresh issue
+
   const savedOrders = JSON.parse(localStorage.getItem("orders")) || [];
 
   const order =
@@ -28,7 +28,7 @@ function OrderTrack() {
       orders.find((o) => String(o.id) === String(orderId))) ||
     savedOrders.find((o) => String(o.id) === String(orderId));
 
-  // Status timeline
+
   const statusTimeline = [
     {
       status: "Order Placed",
@@ -60,7 +60,7 @@ function OrderTrack() {
     },
   ];
 
-  //  Safe status calculation
+
   useEffect(() => {
     if (!order) return;
 

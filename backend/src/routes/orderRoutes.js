@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const authMiddleware = require("../middlewares/authMiddleware");
+const { protect } = require("../middlewares/authMiddleware");
+
 
 const {
     placeOrder,
@@ -10,9 +11,9 @@ const {
 
 
 
-router.get("/my-orders",authMiddleware, getMyOrders);
-router.post("/", authMiddleware, placeOrder);
+router.get("/my-orders",protect, getMyOrders);
+router.post("/", protect, placeOrder);
 
-router.get("/:orderId", authMiddleware, getSingleOrder);
+router.get("/:orderId", protect, getSingleOrder);
 
 module.exports = router;

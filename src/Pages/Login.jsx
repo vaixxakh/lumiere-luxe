@@ -34,16 +34,16 @@ function Login() {
     setMessage('');
 
       const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/auth/login`,
+        `${import.meta.env.VITE_API_URL}/auth/login`,
         { email, password },
          { withCredentials: true },
 
       );
 
-      const user  = res.data.user;
-     
-      localStorage.setItem('userInfo', JSON.stringify(user));
-      setUser(user);  
+      const {user, token }  = res.data;
+     const authData = {...user, token };
+      localStorage.setItem('userInfo', JSON.stringify(authData));
+      setUser(authData);  
 
       setMsgType('success');
       setMessage(`Welcome back, ${user.name}!`);
@@ -52,7 +52,7 @@ function Login() {
         setShowLogin(false); 
 
           if(user.isAdmin){
-            navigate("/admin/dashboard");
+            navigate("/admin");
           } else {
             navigate("/")
           }

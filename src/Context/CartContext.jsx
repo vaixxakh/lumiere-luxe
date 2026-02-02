@@ -8,28 +8,22 @@ export const CartProvider = ({ children }) => {
   /* ================= CART STATE ================= */
   const [cart, setCart] = useState([]);
   const [wishlist, setWishlist] = useState(() => {
+
     if (typeof window === "undefined") return [];
+
     const saved = localStorage.getItem("wishlist");
     return saved ? JSON.parse(saved) : [];
   });
 
 
-
-  /* ================= HELPERS ================= */
-  const normalizePrice = (price) => {
-    if (!price) return 0;
-    if (typeof price === "number") return price;
-    return Number(String(price).replace(/[^0-9.]/g, "")) || 0;
-  };
-
   /* ================= FETCH CART FROM DB ================= */
   const fetchCart = async () => {
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/cart`,
+        `${import.meta.env.VITE_API_URL}/cart`,
         { withCredentials: true }
       );
-      setCart(res.data || []);
+      setCart(res.data.cart);
     } catch (err) {
       console.log("FETCH CART ERROR", err.response?.data || err.message);
       setCart([]);
@@ -37,18 +31,15 @@ export const CartProvider = ({ children }) => {
   };
 
   /* ================= ADD TO CART ================= */
-  const addToCart = async (product) => {
+  const addToCart = async (productId) => {
     try {
       const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/cart/add`,
-        {
-          productId: product._id,
-          quantity: 1,
-        },
+        `${import.meta.env.VITE_API_URL}/cart/add`,
+        { productId, quantity: 1},
         { withCredentials: true }
-      );
-
-      setCart(res.data || []);
+      );  
+      
+      setCart(res.data.cart);
     } catch (err) {
       console.error("ADD TO CART ERROR", err.response?.data || err.message);
     }
@@ -58,11 +49,11 @@ export const CartProvider = ({ children }) => {
   const removeFromCart = async (productId) => {
     try {
       const res = await axios.delete(
-        `${import.meta.env.VITE_API_URL}/api/cart/${productId}`,
+        `${import.meta.env.VITE_API_URL}/cart/${productId}`,
         { withCredentials: true }
       );
 
-      setCart(res.data || []);
+      setCart(res.data.cart);
     } catch (err) {
       console.error("REMOVE CART ERROR", err.response?.data || err.message);
     }
@@ -72,12 +63,12 @@ export const CartProvider = ({ children }) => {
   const updateQuantity = async (productId, quantity) => {
     try {
       const res = await axios.put(
-        `${import.meta.env.VITE_API_URL}/api/cart/${productId}`,
+        `${import.meta.env.VITE_API_URL}/cart/${productId}`,
         { quantity },
         { withCredentials: true }
       );
 
-      setCart(res.data || []);
+      setCart(res.data.cart);
     } catch (err) {
       console.error("UPDATE QTY ERROR", err.response?.data || err.message);
     }
@@ -86,44 +77,47 @@ export const CartProvider = ({ children }) => {
   /* ================= CLEAR CART ================= */
   const clearCart = async () => {
     try {
-      await axios.delete(
-        `${import.meta.env.VITE_API_URL}/api/cart/clear`,
-        {},
+     const res = await axios.delete(
+        `${import.meta.env.VITE_API_URL}/cart/clear`,
         { withCredentials: true }
       );
-      setCart([]);
+      setCart(res.data.cart);
     } catch {}
   };
 
   /* ================= WISHLIST ================= */
-  const addToWishlist = (product) => {
-    setWishlist((prev) =>
-      prev.some((i) => i._id === product._id) ? prev : [...prev, product]
+  const addToWishlist = (productId) => {
+    setWishlist(prev =>
+      prev.includes(productId) ? prev : [...prev, productId]
     );
   };
-
-  const removeFromWishlist = (id) => {
-    setWishlist((prev) => prev.filter((i) => i._id !== id));
+  const removeFromWishlist = (productId) => {
+    setWishlist(prev => prev.filter(id => id !== productId));
   };
 
-  const isWishlisted = (id) =>
-    wishlist.some((item) => item._id === id);
+  const isWishlisted = (productId) =>
+    wishlist.includes(productId);
 
-  const moveToCart = async (product) => {
-    await addToCart(product);
-    removeFromWishlist(product._id);
+  const moveToCart = async (productId) => {
+    try {
+      await addToCart(productId);
+      removeFromWishlist(productId);
+    } catch (error) {
+      console.log("Move to cart failed!", error);
+    }
   };
 
   /* ================= TOTALS ================= */
   const safeCart = Array.isArray(cart) ? cart: [];
-  const cartTotal = safeCart.reduce(
-    (sum, item) =>
-      sum + normalizePrice(item.productId?.price) * (item.quantity || 1),
-    0
-  );
+  
+ const cartTotal = safeCart.reduce(
+  (sum, item) =>
+    sum + (item.productId?.price || 0) * (item.quantity || 1),
+  0
+);
 
   const cartCount = safeCart.reduce(
-    (sum, item) => sum + (item.quantity || 0 ),
+    (sum, item) => sum + Math.max(0, Number(item.quantity )|| 0 ),
     0
   );
 
@@ -131,7 +125,7 @@ export const CartProvider = ({ children }) => {
 
   /* ================= INIT ================= */
   useEffect(() => {
-    fetchCart();
+   fetchCart();
   }, []);
 
   useEffect(() => {

@@ -75,7 +75,7 @@ useEffect(() => {
   const startTime = Date.now();
 
   axios
-    .get(`${import.meta.env.VITE_API_URL}/api/products`)
+    .get(`${import.meta.env.VITE_API_URL}/products`)
     .then((res) => {
         const elasped = Date.now() - startTime;
         const delay = Math.max(1000 - elasped, 0)

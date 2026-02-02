@@ -7,7 +7,7 @@ const AdminUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState('all'); // all, active, blocked
+  const [filter, setFilter] = useState('all'); 
   const [selectedUser, setSelectedUser] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
 
@@ -55,7 +55,7 @@ const AdminUsers = () => {
   };
 
 
-  //  FIX: Safe filtering with null/undefined checks
+ 
   const filteredUsers = users.filter(u => {
     if (!u) return false;
     
@@ -73,7 +73,7 @@ const AdminUsers = () => {
   });
 
 
-  //  FIX: Proper useEffect dependencies and null checks
+  
   useEffect(() => {
     if (selectedUser) {
       const isUserInFilteredList = filteredUsers.some(u => u && u.id === selectedUser.id);

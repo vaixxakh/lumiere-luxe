@@ -1,16 +1,9 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+
 import { useCart } from "../Context/CartContext";
 
 function ProductCard({ product }) {
-  const navigate = useNavigate();
-  const { addToCart, setSingleBuy } = useCart();
+  const { addToCart } = useCart();
 
-  // Handle Buy Now
-  const handleBuyNow = () => {
-    setSingleBuy(product); // store the single product
-    navigate("/payment"); // redirect to payment
-  };
 
   return (
     <div className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition">

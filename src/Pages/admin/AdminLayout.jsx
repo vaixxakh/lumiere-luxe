@@ -12,21 +12,26 @@ const AdminLayout = () => {
 
   const logout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
-      localStorage.removeItem('adminToken');
-      navigate('/login');
+      localStorage.removeItem('userInfo');
+      navigate('/');
     }
   };
 
 
-  const isActive = (path) => location.pathname === path;
+ const isActive = (path) => {
+  if (path === "/admin") {
+    return location.pathname === "/admin";
+  }
+  return location.pathname.startsWith(path);
+};
 
 
-  const navLinks = [
-    { path: '/admin', label: 'Dashboard', icon: Home },
-    { path: '/admin/products', label: 'Products', icon: Box },
-    { path: '/admin/orders', label: 'Orders', icon: List },
-    { path: '/admin/users', label: 'Users', icon: Users },
-  ];
+ const navLinks = [
+  { path: "/admin", label: "Dashboard", icon: Home },
+  { path: "/admin/products", label: "Products", icon: Box },
+  { path: "/admin/orders", label: "Orders", icon: List },
+  { path: "/admin/users", label: "Users", icon: Users },
+];
 
 
   return (

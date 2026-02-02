@@ -1,9 +1,12 @@
 const express = require("express");
 const router = express.Router();
 
-const { protect, adminOnly } = require("../middlewares/adminMiddleware");
+const { protect, adminOnly } = require("../middlewares/authMiddleware");
+const {adminLogin} = require("../controllers/authController")
+const { getAllOrdersForAdmin, updateOrderStatus } = require("../controllers/adminOrderController");
 
-const { getDashboardSats } = require("../controller/adminDashboardController");
+
+const { getDashboardStats } = require("../controllers/adminDashboardController");
 
 const {
     addProduct,
@@ -12,14 +15,19 @@ const {
     deleteProduct
 } = require("../controllers/adminProductController");
 
-router.use(protect, adminOnly);
+router.use(protect);
+router.use(adminOnly);
 
-router.get("/dashboard", getDashboardSats)
+router.get("/dashboard", getDashboardStats)
+router.get("/orders", getAllOrdersForAdmin);
+router.patch("/orders/:id/status", updateOrderStatus);
+router.post("/login", adminLogin);
 
 router.post("/product", addProduct);
 router.get("/products", getAllProducts);
 router.put("/product/:id",  updateProduct);
 router.delete("/product/:id", deleteProduct);
+
 
 
 module.exports = router;
