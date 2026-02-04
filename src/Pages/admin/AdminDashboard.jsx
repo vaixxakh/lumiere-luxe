@@ -6,21 +6,20 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
-useEffect(() => {
-  const fetchStats = async () => {
-    try {
-      const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/admin/dashboard`,
-        {withCredentials: true}
-      );
-      setStats(res.data);
-      setLoading(false);
-    } catch (err){
-      setLoading(false);
-    }
-  };
-   fetchStats();
-}, []);
+ useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await getDashboardStats();
+        setStats(res.data);
+      } catch (err) {
+        console.error("Dashboard error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -44,7 +43,8 @@ useEffect(() => {
 
 
   const StatCard = ({ icon: Icon, title, value, color, bgGradient }) => (
-    <div className={`${bgGradient} text-white rounded-xl shadow-lg p-6 transform hover:scale-105 transition-transform duration-300`}>
+    <div className={`${bgGradient} text-white rounded-xl shadow-lg p-6
+     transform hover:scale-105 transition-transform duration-300`}>
       <div className="flex items-center justify-between mb-4">
         <Icon size={36} className="opacity-80" />
         <span className="text-xs font-semibold uppercase opacity-70 bg-white bg-opacity-20 px-3 py-1 rounded-full">
@@ -147,7 +147,8 @@ useEffect(() => {
               stats.recentOrders.map(order => (
                 <div
                   key={order.orderId}
-                  className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg hover:shadow-md transition border-l-4 border-green-500"
+                  className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50
+                   to-gray-100 rounded-lg hover:shadow-md transition border-l-4 border-green-500"
                 >
                   <div className="flex-1">
                     <p className="font-semibold text-gray-800">{order.customerName}</p>
@@ -155,7 +156,8 @@ useEffect(() => {
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-yellow-500 text-lg">₹{order.total}</p>
-                    <span className={`text-xs px-2 py-1 rounded-full font-semibold inline-block mt-1 ${getStatusColor(order.status)}`}>
+                    <span className={`text-xs px-2 py-1 rounded-full font-semibold inline-block mt-1 
+                      ${getStatusColor(order.status)}`}>
                       {order.status}
                     </span>
                   </div>
@@ -182,11 +184,13 @@ useEffect(() => {
             {stats.recentUsers && stats.recentUsers.length > 0 ? (
               stats.recentUsers.map(user => (
                 <div
-                  key={user.id}
-                  className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg hover:shadow-md transition border-l-4 border-blue-500"
+                  key={user._id || user.id}
+                  className="flex items-center justify-between p-4 bg-gradient-to-r 
+                  from-gray-50 to-gray-100 rounded-lg hover:shadow-md transition border-l-4 border-blue-500"
                 >
                   <div className="flex items-center gap-3 flex-1">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-400
+                     to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
                       {user.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
@@ -194,7 +198,8 @@ useEffect(() => {
                       <p className="text-xs text-gray-600">{user.email}</p>
                     </div>
                   </div>
-                  <span className="flex items-center gap-1 text-green-600 font-semibold text-xs bg-green-100 px-3 py-1 rounded-full">
+                  <span className="flex items-center gap-1 text-green-600 font-semibold text-xs 
+                  bg-green-100 px-3 py-1 rounded-full">
                     <CheckCircle size={14} />
                     Active
                   </span>
@@ -211,7 +216,8 @@ useEffect(() => {
       </div>
 
       {/* Quick Stats */}
-      <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-xl p-8">
+      <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-2
+       border-yellow-200 rounded-xl p-8">
         <h2 className="text-2xl font-bold text-gray-800 mb-6"> Quick Stats</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>

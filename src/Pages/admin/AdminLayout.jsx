@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { Home, Box, Users, List, LogOut, Menu, X,   } from 'lucide-react';
 
@@ -20,7 +20,7 @@ const AdminLayout = () => {
 
  const isActive = (path) => {
   if (path === "/admin") {
-    return location.pathname === "/admin";
+    return location.pathname === "/admin" ;
   }
   return location.pathname.startsWith(path);
 };
@@ -32,6 +32,7 @@ const AdminLayout = () => {
   { path: "/admin/orders", label: "Orders", icon: List },
   { path: "/admin/users", label: "Users", icon: Users },
 ];
+
 
 
   return (
@@ -52,7 +53,7 @@ const AdminLayout = () => {
         </div>
 
 
-        {/* Navigation - Scrollable if needed */}
+        
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {navLinks.map(({ path, label, icon: Icon }) => (
             <Link
@@ -77,7 +78,7 @@ const AdminLayout = () => {
         </nav>
 
 
-        {/* Logout Button - Fixed at bottom */}
+       
         <div className="p-4 border-t border-gray-700 space-y-2 flex-shrink-0">
           <button
             onClick={logout}
@@ -90,14 +91,13 @@ const AdminLayout = () => {
         </div>
       </aside>
 
-
-      {/* Main Content */}
+ 
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Top Header - Fixed */}
+        
         <header className="bg-gradient-to-r from-white to-gray-50 border-b border-gray-200 p-6 shadow-sm flex-shrink-0 z-30">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              {/* Mobile Menu Toggle */}
+              
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
                 className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition"
@@ -110,7 +110,7 @@ const AdminLayout = () => {
               </button>
 
 
-              {/* Header Title */}
+              
               <div>
                 <h2 className="text-2xl font-bold text-gray-800">Admin Dashboard</h2>
                 <p className="text-sm text-gray-600">
@@ -120,11 +120,9 @@ const AdminLayout = () => {
             </div>
 
 
-            {/* Right Actions */}
             <div className="flex items-center gap-4">
 
 
-              {/* Profile Menu */}
               <div className="relative">
                 <button
                   onClick={() => setShowProfile(!showProfile)}
@@ -140,7 +138,7 @@ const AdminLayout = () => {
                 </button>
 
 
-                {/* Profile Dropdown */}
+                
                 {showProfile && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden z-50">
                     <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 p-4 text-gray-900">
@@ -173,7 +171,6 @@ const AdminLayout = () => {
         </header>
 
 
-        {/* Main Content Area - Scrollable */}
         <main className="flex-1 overflow-y-auto bg-gray-100">
           <div className="p-6">
             <Outlet />
@@ -182,7 +179,6 @@ const AdminLayout = () => {
       </div>
 
 
-      {/* Mobile Overlay */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 md:hidden z-30"

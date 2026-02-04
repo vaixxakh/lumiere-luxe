@@ -13,6 +13,9 @@ const ProductsPage = ({ searchTerm }) => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortOrder, setSortOrder] = useState("none");
   const [loading, setLoading ] = useState(true);
+  
+  const [ searchInput, setSearchInput ] = useState("");
+  const [ showSuggestions, setShowSuggestions ] = useState(false);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const initialPage = Number(searchParams.get("page")) || 1;
@@ -102,7 +105,9 @@ useEffect(() => {
       selectedCategory === "All" ? true : p.category === selectedCategory)
 
     .filter((p) =>
-      p.name?.toLowerCase().includes((searchTerm || "").toLowerCase()))
+      p.name?.toLowerCase().includes(
+        (searchTerm || searchInput || "").toLowerCase())
+      )
     
     .sort((a, b) => {
       if (sortOrder === "lowToHigh") return a.price - b.price;
@@ -110,6 +115,12 @@ useEffect(() => {
       return 0;
     });
 
+
+    const suggestedProducts = allProducts
+    .filter(p => 
+      p.name?.toLowerCase().includes(searchInput.toLowerCase())
+    )
+    .slice(0, 6);
 
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -129,6 +140,11 @@ useEffect(() => {
     setTimeout(() => setLoading(false), 600);
 
   }
+  useEffect(() => {
+  const handleClickOutside = () => setShowSuggestions(false);
+  document.addEventListener("click", handleClickOutside);
+  return () => document.removeEventListener("click", handleClickOutside);
+}, []);
 
   return (
     
@@ -175,6 +191,40 @@ useEffect(() => {
               <option value="highToLow">High to Low</option>
             </select>
           </div>
+        </div>
+
+        <div className="relative w-full max-w-xl mb-6">
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={searchInput}
+            onChange={(e) => {
+              setSearchInput(e.target.value);
+              setShowSuggestions(true);
+            }}
+            onFocus={() => setShowSuggestions(true)}
+            className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 outline-none"
+          />
+
+          {/* SUGGESTION DROPDOWN */}
+          {showSuggestions && searchInput && suggestedProducts.length > 0 && (
+            <div className="absolute left-0 right-0 bg-white border shadow-lg rounded-lg mt-1 z-50 max-h-60 overflow-y-auto">
+              {suggestedProducts.map(product => (
+                <div
+                  key={product._id}
+                  onClick={() => {
+                    setShowSuggestions(false);
+                    setSearchInput("");
+                    navigate(`/product/${product._id}`);
+                  }}
+                  className="px-4 py-3 hover:bg-yellow-50 cursor-pointer border-b last:border-b-0"
+                >
+                  <p className="font-semibold text-sm">{product.name}</p>
+                  <p className="text-xs text-gray-500">₹{product.price}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
 
@@ -239,22 +289,6 @@ useEffect(() => {
                     </p>
                   </div>
 
-
-                  {/* Action Buttons */}
-                  {/* <div className="space-y-2">
-                    <button
-                      onClick={() => handleAddToCart(product)}
-                      className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-2  text-xs sm:text-sm transition-colors"
-                    >
-                      Add to Cart
-                    </button>
-                    <button
-                      onClick={(e) => handleBuyNow(e,product)}
-                      className="w-full bg-orange-500 hover:bg-orange-400 text-black  font-semibold py-2  text-xs sm:text-sm transition-colors"
-                    >
-                      Buy Now
-                    </button>
-                  </div> */}
                 </div>
               </motion.div>
             );

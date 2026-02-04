@@ -19,13 +19,13 @@ const orderSchema = new mongoose.Schema({
   paymentId: String, 
   status: {
     type: String,
-    enum: ["Processing", "Shipped", "Delivered"],
-    default: "Processing",
+    enum: ["Pending", "Processing", "Shipped", "Delivered"],
+    default: "Pending",
   },
   subtotal: Number,
   tax: Number,
   shipping: Number,
-  total: Number,
+  total: { type: Number, required: true },
 }, { timestamps: true });
 
 module.exports = mongoose.model("Order", orderSchema);

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { getUsers, blockUser, unblockUser } from "../Services/adminApi";
+import  { useEffect, useState } from 'react';
+import { getAllUsers, blockUser, unblockUser,  } from "../Services/adminApi";
 import { Ban, Check, Mail, User, Search, Filter } from 'lucide-react';
 
 
@@ -17,10 +17,17 @@ const AdminUsers = () => {
   }, []);
 
 
+
   const fetchUsers = async () => {
     try {
-      const res = await getUsers();
-      setUsers(res.data || []);
+      const res = await getAllUsers();
+
+      const normalizedUsers = (res.data || []).map(u => ({
+        ...u, 
+        id: u._id || u.id
+      }));
+
+      setUsers(normalizedUsers);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -30,41 +37,54 @@ const AdminUsers = () => {
 
 
   const handleBlock = async (id) => {
-    if (window.confirm('Are you sure you want to block this user?')) {
+    if (window.confirm('Are you sure you want to block this user?')) return;
+
       try {
         await blockUser(id);
-        fetchUsers();
+
+        setUsers(prev => 
+          prev.map(u => 
+            u.id === id? { ...u, blocked: true } : u
+          )
+        );
         setShowDetails(false);
       } catch (error) {
         alert('Error blocking user');
       }
-    }
+    
   };
 
-
   const handleUnblock = async (id) => {
-    if (window.confirm('Are you sure you want to unblock this user?')) {
+    if (window.confirm('Are you sure you want to unblock this user?')) return;
+
       try {
         await unblockUser(id);
-        fetchUsers();
+
+        setUsers(prev => 
+          prev.map(u => 
+            u.id === id? { ...u, blocked: false } : u
+          )
+        );
+
         setShowDetails(false);
       } catch (error) {
         alert('Error unblocking user');
       }
-    }
+    
   };
 
+ 
 
  
   const filteredUsers = users.filter(u => {
     if (!u) return false;
     
-    const name = u.name ? String(u.name).toLowerCase() : '';
-    const email = u.email ? String(u.email).toLowerCase() : '';
-    const search = searchTerm.toLowerCase();
+        const name = (u.name || '').toLowerCase();
+        const email = (u.email || '').toLowerCase();
+        const search = searchTerm.toLowerCase()
 
-
-    const matchesSearch = name.includes(search) || email.includes(search);
+    const matchesSearch = 
+    name.includes(search) || email.includes(search);
 
 
     if (filter === 'active') return matchesSearch && !u.blocked;
@@ -72,17 +92,6 @@ const AdminUsers = () => {
     return matchesSearch;
   });
 
-
-  
-  useEffect(() => {
-    if (selectedUser) {
-      const isUserInFilteredList = filteredUsers.some(u => u && u.id === selectedUser.id);
-      if (!isUserInFilteredList) {
-        setSelectedUser(null);
-        setShowDetails(false);
-      }
-    }
-  }, [filteredUsers, selectedUser]);
 
 
   if (loading) {
@@ -149,7 +158,7 @@ const AdminUsers = () => {
         </div>
 
 
-        {/* Search and Filter - Responsive */}
+   
         <div className="bg-white rounded-lg sm:rounded-xl shadow-lg p-4 sm:p-6 border border-gray-200 space-y-3 sm:space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             {/* Search */}
@@ -185,12 +194,10 @@ const AdminUsers = () => {
           </div>
         </div>
 
-
-        {/* Users Grid & Table - Responsive */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-          {/* Users List - Desktop Table, Mobile Cards */}
+          
           <div className="lg:col-span-2 bg-white rounded-lg sm:rounded-xl shadow-lg overflow-hidden border border-gray-200">
-            {/* Desktop Table View */}
+           
             <div className="hidden sm:block overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gradient-to-r from-amber-500 to-amber-600 text-white">
@@ -204,12 +211,12 @@ const AdminUsers = () => {
                 <tbody className="divide-y divide-gray-200">
                   {filteredUsers.length > 0 ? (
                     filteredUsers.map(u => {
-                      //  FIX: Add null check
+                     
                       if (!u) return null;
                       
                       return (
                         <tr
-                          key={u.id}
+                          key={u._id}
                           onClick={() => {
                             setSelectedUser(u);
                             setShowDetails(true);
@@ -223,7 +230,7 @@ const AdminUsers = () => {
                               </div>
                               <div>
                                 <p className="font-semibold text-gray-800 text-sm">{u.name || 'Unknown'}</p>
-                                <p className="text-xs text-gray-500">ID: {u.id}</p>
+                                <p className="text-xs text-gray-500">ID: {u._id}</p>
                               </div>
                             </div>
                           </td>
@@ -249,7 +256,7 @@ const AdminUsers = () => {
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    handleUnblock(u.id);
+                                    handleUnblock(u._id);
                                   }}
                                   className="p-2 bg-green-50 hover:bg-green-100 text-green-600 rounded-lg transition border border-green-200"
                                   title="Unblock User"
@@ -260,7 +267,7 @@ const AdminUsers = () => {
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    handleBlock(u.id);
+                                    handleBlock(u._id);
                                   }}
                                   className="p-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition border border-red-200"
                                   title="Block User"
@@ -286,16 +293,15 @@ const AdminUsers = () => {
             </div>
 
 
-            {/* Mobile Card View */}
+           
             <div className="sm:hidden space-y-3 p-4">
               {filteredUsers.length > 0 ? (
                 filteredUsers.map(u => {
-                  //  FIX: Add null check
                   if (!u) return null;
                   
                   return (
                     <div
-                      key={u.id}
+                      key={u._id}
                       onClick={() => {
                         setSelectedUser(u);
                         setShowDetails(true);
@@ -327,7 +333,7 @@ const AdminUsers = () => {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleUnblock(u.id);
+                              handleUnblock(u._id);
                             }}
                             className="p-2 bg-green-50 hover:bg-green-100 text-green-600 rounded-lg transition text-xs font-semibold flex items-center gap-1 border border-green-200"
                           >
@@ -337,7 +343,7 @@ const AdminUsers = () => {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleBlock(u.id);
+                              handleBlock(u._id);
                             }}
                             className="p-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition text-xs font-semibold flex items-center gap-1 border border-red-200"
                           >
@@ -379,7 +385,8 @@ const AdminUsers = () => {
                   {/* Email */}
                   <div>
                     <label className="text-xs font-semibold text-gray-500 uppercase">Email</label>
-                    <div className="flex items-center gap-2 mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="flex items-center gap-2 mt-2 p-3
+                    bg-gray-50 rounded-lg border border-gray-200">
                       <Mail size={14} className="text-gray-400" />
                       <p className="text-xs sm:text-sm break-all text-gray-800">{selectedUser.email || 'N/A'}</p>
                     </div>
@@ -390,19 +397,21 @@ const AdminUsers = () => {
                   <div>
                     <label className="text-xs font-semibold text-gray-500 uppercase">Status</label>
                     <div className="mt-2">
-                      <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold w-full justify-center ${
+                      <span className=
+                      {`inline-flex items-center gap-2 px-4 py-2 rounded-full
+                        text-sm font-semibold w-full justify-center ${
                         selectedUser.blocked
                           ? 'bg-red-50 text-red-700 border border-red-200'
                           : 'bg-green-50 text-green-700 border border-green-200'
                       }`}>
-                        <span className={`w-2 h-2 rounded-full ${selectedUser.blocked ? 'bg-red-700' : 'bg-green-700'}`} />
+                        <span className={`w-2 h-2 rounded-full ${selectedUser.blocked ? 
+                          'bg-red-700' : 'bg-green-700'}`} />
                         {selectedUser.blocked ? 'Blocked' : 'Active'}
                       </span>
                     </div>
                   </div>
 
 
-                  {/* User ID */}
                   <div>
                     <label className="text-xs font-semibold text-gray-500 uppercase">User ID</label>
                     <p className="mt-2 p-3 bg-gray-50 rounded-lg text-xs sm:text-sm font-mono text-gray-800 border border-gray-200">{selectedUser.id}</p>

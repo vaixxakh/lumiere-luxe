@@ -3,10 +3,10 @@ const Order = require("../models/Order");
 exports.getAllOrdersForAdmin = async (req, res) => {
   try {
     const orders = await Order.find()
-      .populate("user", "name email")
+      .populate("userId", "name email")
       .sort({ createdAt: -1 });
 
-    res.json({ orders });
+    res.json( orders );
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch orders" });
   }
@@ -27,7 +27,7 @@ exports.updateOrderStatus = async (req, res) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    res.json({ order });
+    res.json(order );
   } catch (error) {
     res.status(500).json({ message: "Failed to update order status" });
   }

@@ -34,7 +34,7 @@ export const CartProvider = ({ children }) => {
   const addToCart = async (productId) => {
     try {
       const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/cart/add`,
+        `${import.meta.env.VITE_API_URL}/cart`,
         { productId, quantity: 1},
         { withCredentials: true }
       );  

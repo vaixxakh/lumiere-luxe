@@ -1,10 +1,15 @@
-
+import { useNavigate } from "react-router-dom";
 import { useCart } from "../Context/CartContext";
 
 function ProductCard({ product }) {
   const { addToCart } = useCart();
+  const navigate = useNavigate();
 
-
+  const handleBuyNow = () => {
+    addToCart(product, 1);  
+    navigate("/payment");        
+  };
+//
   return (
     <div className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition">
       <img
@@ -12,12 +17,13 @@ function ProductCard({ product }) {
         alt={product.name}
         className="w-full h-60 object-cover rounded-lg"
       />
+
       <h3 className="text-lg font-semibold mt-3">{product.name}</h3>
       <p className="text-gray-600 mb-2">₹{product.price}</p>
 
       <div className="flex gap-3">
         <button
-          onClick={() => addToCart(product)}
+          onClick={() => addToCart(product, 1)}
           className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-medium w-full"
         >
           Add to Cart

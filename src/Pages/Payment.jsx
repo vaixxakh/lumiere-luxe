@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useCart } from "../Context/CartContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Lock, Loader, ArrowLeft } from "lucide-react";
+import { Lock, Loader,  } from "lucide-react";
 import { toast } from "react-toastify";
 import "./Payment.css"
 
@@ -46,7 +46,7 @@ function Payment() {
       return false;
     }
     return true;
-  };
+  };q
 
   /* ================= COD ================= */
   
@@ -56,10 +56,11 @@ function Payment() {
       setProcessing(true)
     
       const { data } = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/orders/place`,
+        `${import.meta.env.VITE_API_URL}/orders`,
       {
         paymentMethod:"COD",
         shippingAddress:formData,
+
       },
       { withCredentials:true }
     );
@@ -82,7 +83,7 @@ function Payment() {
       setProcessing(true);
 
       const { data } = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/payment/create-order`,
+        `${import.meta.env.VITE_API_URL}/payment/create-order`,
         { amount: grandTotal }
       );
 
@@ -97,7 +98,7 @@ function Payment() {
         handler: async function (response) {
           try {
             await axios.post(
-              `${import.meta.env.VITE_API_URL}/api/payment/verify`,
+              `${import.meta.env.VITE_API_URL}/payment/verify`,
               response,
                {withCredentials: true },
             );

@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 import { getOrders, updateOrderStatus } from '../Services/adminApi';
 import { ShoppingBag, MapPin, Mail, User, Truck, CheckCircle, Clock, AlertCircle, Eye, DownloadCloud, X, Phone } from 'lucide-react';
 
@@ -23,7 +25,10 @@ const AdminOrders = () => {
   const fetchOrders = async () => {
     try {
       const res = await getOrders();
-      setOrders(res.data || []);
+      const data = Array.isArray(res.data)
+      ? res.data 
+      : res.data.orders || [];
+      setOrders(data);
       setLoading(false);
     } catch (err) {
       console.error('Error fetching orders:', err);
@@ -33,20 +38,18 @@ const AdminOrders = () => {
   };
 
 
-  //  Format price properly
   const formatPrice = (price) => {
     if (!price && price !== 0) return '0';
     return Number(price).toLocaleString('en-IN');
   };
 
 
-  //  Safe string conversion for toLowerCase
   const safeString = (str) => {
     return str ? String(str).toLowerCase() : '';
   };
 
 
-  // PATCH the whole order object to work with JSON Server
+
   const changeStatus = async (orderId, status) => {
     setUpdatingId(orderId);
     setError('');
@@ -55,21 +58,22 @@ const AdminOrders = () => {
 
     try {
     
-      const order = orders.find((o) => o.orderId === orderId || o.id === orderId);
+      const order = orders.find(
+        (o) => o.orderId === orderId || o.id === orderId);
       if (!order) throw new Error('Order not found');
       
-      // Use correct ID field for database
-      const dbId = order.id || order.orderId;
-      await updateOrder(dbId, { ...order, status });
       
-      const updateOrderStatus = orders.map(o =>
+      const dbId = order._id;
+      await updateOrderStatus(dbId, { status });
+      
+      const updatedOrders  = orders.map(o =>
         (o.orderId === orderId || o.id === orderId) ? { ...o, status } : o
       );
-      setOrders(updateOrderStatus);
+      setOrders(updatedOrders );
 
 
       if (selected && (selected.orderId === orderId || selected.id === orderId)) {
-        setSelected(prev => prev ? { ...prev, status } : null);
+        setSelected((prev) => ({ ...prev, status }));
       }
 
 
@@ -84,13 +88,12 @@ const AdminOrders = () => {
   };
 
 
-  // Safe filter with null checks
   const filteredOrders = orders.filter(o => {
     if (!o) return false;
     
     const matchesSearch = 
       safeString(o.customerName).includes(safeString(searchTerm)) ||
-      safeString(o.orderId).includes(safeString(searchTerm)) ||
+      safeString(o.orderId || o._id).includes(safeString(searchTerm)) ||
       safeString(o.email).includes(safeString(searchTerm));
     
     if (filterStatus === 'all') return matchesSearch;
@@ -145,60 +148,57 @@ const AdminOrders = () => {
 
 
   const downloadInvoice = (order) => {
-    const invoiceContent = `
-╔═══════════════════════════════════════════════════════════╗
-║                    LUMIERE - INVOICE                      ║
-╚═══════════════════════════════════════════════════════════╝
+    const doc = new jsPDF();
 
+    doc.sentFontSize(18);
+    doc.text("LUMIERE LIGHTING - INVOICE", 70, 15);
 
-ORDER DETAILS
-─────────────────────────────────────────────────────────────
-Order ID:        ${order.orderId}
-Date:            ${new Date(order.orderDate || new Date()).toLocaleDateString()}
-Status:          ${order.status || 'N/A'}
-Payment Method:  ${order.paymentMethod || 'N/A'}
+    doc.setFontSize(10);
+    doc.text(`Order ID: ${order.orderId}`, 14, 30);
+    doc.text(`Date: ${new Date(order.createdAt || new Date()).toLocaleDateString()}`, 14, 36);
+    doc.text(`Status: ${order.status}`, 14, 42);
+    doc.text(`Payment: ${order.paymentMethod || "N/A"}`, 14, 48);
 
+    doc.text("Customer Details:", 14, 60);
+    doc.text(`Name: ${order.customerName || "N/A"}`, 14, 66);
+    doc.text(`Email: ${order.email || "N/A"}`, 14, 72);
+    doc.text(`Phone: ${order.phone || "N/A"}`, 14, 78);
+    doc.text(`Address: ${order.shippingAddress || "N/A"}`, 14, 84);
 
-CUSTOMER DETAILS:
-Name:            ${order.customerName || 'N/A'}
-Email:           ${order.email || 'N/A'}
-Phone:           ${order.phone || 'N/A'}
-Address:         ${order.shippingAddress || 'N/A'}
+      const tableColumn = ["Product", "Qty", "Price", "Subtotal"];
+      const tableRows = [];
 
+      
+  order.items?.forEach(item => {
+    const row = [
+      item.productName,
+      item.quantity,
+      `₹${formatPrice(item.price)}`,
+      `₹${formatPrice(item.price * item.quantity)}`
+    ];
+    tableRows.push(row);
+  });
 
-ORDER ITEMS:
-─────────────────────────────────────────────────────────────
-${order.items?.map(item => `${item.productName}
-  Quantity: ${item.quantity} x Price: ₹${formatPrice(item.price)}
-  Subtotal: ₹${formatPrice(item.price * item.quantity)}`).join('\n\n') || 'No items'}
+  doc.autoTable({
+    startY: 95,
+    head: [tableColumn],
+    body: tableRows,
+  });
 
+  const finalY = doc.lastAutoTable.finalY + 10;
 
-PRICE SUMMARY
-─────────────────────────────────────────────────────────────
-Subtotal:        ₹${formatPrice(order.subtotal)}
-Shipping:        ₹${formatPrice(order.shipping)}
-Tax (18%):       ₹${formatPrice(order.tax)}
-─────────────────────────────────────────────────────────────
-TOTAL:           ₹${formatPrice(order.total)}
+  doc.text(`Subtotal: ₹${formatPrice(order.subtotal)}`, 14, finalY);
+  doc.text(`Shipping: ₹${formatPrice(order.shipping)}`, 14, finalY + 6);
+  doc.text(`Tax: ₹${formatPrice(order.tax)}`, 14, finalY + 12);
+  doc.text(`TOTAL: ₹${formatPrice(order.total)}`, 14, finalY + 18);
 
+  
+  doc.save(`invoice-${order.orderId}.pdf`);
 
-Thank you for your business! ✨
-    `;
-    const blob = new Blob([invoiceContent], { type: 'text/plain' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `invoice-${order.orderId}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
+  setSuccessMsg("Invoice downloaded as PDF!");
+  setTimeout(() => setSuccessMsg(""), 3000);
 
-
-    setSuccessMsg('Invoice downloaded successfully!');
-    setTimeout(() => setSuccessMsg(''), 3000);
-  };
-
+  }
 
   if (loading) {
     return (

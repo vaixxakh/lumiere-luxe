@@ -18,55 +18,55 @@ function Login() {
 
 
   const handleLogin = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (loading) return;
+  if (!email || !password) {
+    setMsgType("error");
+    setMessage("Please fill all fields");
+    return;
+  }
 
-
-    if (!email || !password) {
-      setMsgType('error');
-      setMessage('Please fill all fields');
-      return;
-    }
-
-    try { 
+  try {
     setLoading(true);
-    setMessage('');
+    setMessage("");
 
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/auth/login`,
-        { email, password },
-         { withCredentials: true },
+    const res = await axios.post(
+      `${import.meta.env.VITE_API_URL}/auth/login`,
+      { email, password },
+      { withCredentials: true }
+    );
 
-      );
+    const { user, token  } = res.data;
 
-      const {user, token }  = res.data;
-     const authData = {...user, token };
-      localStorage.setItem('userInfo', JSON.stringify(authData));
-      setUser(authData);  
+    
+    const authData = {
+      ...user,
+      token, 
+    };
 
-      setMsgType('success');
-      setMessage(`Welcome back, ${user.name}!`);
+    localStorage.setItem("userInfo", JSON.stringify(authData));
+    setUser(authData);
 
-        setTimeout(() => {
-        setShowLogin(false); 
+    setMsgType("success");
+    setMessage(`Welcome back, ${user.name}!`);
 
-          if(user.isAdmin){
-            navigate("/admin");
-          } else {
-            navigate("/")
-          }
+    setTimeout(() => {
+      setShowLogin(false);
 
-      }, 800)
+      if (user.isAdmin) {
+        navigate("/admin");  
+        return;
+      }
+    }, 800);
 
-    } catch (error) {
-      console.error(error);
-      setMsgType('error');
-      setMessage(' Login failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (error) {
+    console.error(error);
+    setMsgType("error");
+    setMessage("Login failed. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="bg-white shadow-2xl  p-9 w-full max-w-md border  border-gray-100">

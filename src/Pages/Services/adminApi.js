@@ -1,12 +1,14 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL, 
+  baseURL: import.meta.env.VITE_API_URL,   
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
 });
+
+/* ===================== JWT INTERCEPTOR ===================== */
 
 API.interceptors.request.use(
   (config) => {
@@ -15,13 +17,16 @@ API.interceptors.request.use(
     if (authData?.token) {
       config.headers.Authorization = `Bearer ${authData.token}`;
     }
+
     return config;
   },
   (error) => Promise.reject(error)
 );
 
+/* ===================== ERROR INTERCEPTOR ===================== */
+
 API.interceptors.response.use(
-  (response) => response, 
+  (response) => response,
   (error) => {
     console.log(
       "API Error:",
@@ -31,45 +36,61 @@ API.interceptors.response.use(
   }
 );
 
-/* =================== ADMIN PRODUCTS =================== */
-export const getProducts = () => API.get("/admin/products");
-export const getProductById = (id) => API.get(`/admin/products/${id}`);
-export const createProduct = (payload) =>
-  API.post("/admin/products", payload);
-export const updateProduct = (id, payload) =>
-  API.put(`/admin/products/${id}`, payload);
-export const deleteProduct = (id) =>
-  API.delete(`/admin/products/${id}`);
-export const archiveProduct = (id) =>
-  API.patch(`/admin/products/${id}/archive`);
+/* ===================== ADMIN DASHBOARD ===================== */
 
-/* =================== ADMIN ORDERS =================== */
-export const getOrders = () => API.get("/admin/orders");
-export const getOrderById = (id) => API.get(`/admin/orders/${id}`);
-export const updateOrderStatus = (id, status) =>
-  API.patch(`/admin/orders/${id}/status`, { status });
-export const deleteOrder = (id) =>
-  API.delete(`/admin/orders/${id}`);
-
-/* =================== ADMIN USERS =================== */
-export const getUsers = () => API.get("/admin/users");
-export const blockUser = (id) =>
-  API.patch(`/admin/users/${id}/block`);
-export const unblockUser = (id) =>
-  API.patch(`/admin/users/${id}/unblock`);
-export const deleteUser = (id) =>
-  API.delete(`/admin/users/${id}`);
-
-/* =================== AUTH =================== */
-export const loginUser = (payload) =>
-  API.post("/auth/login", payload);
-export const registerUser = (payload) =>
-  API.post("/auth/register", payload);
-export const logoutUser = () => API.post("/auth/logout");
-export const getProfile = () => API.get("/auth/me");
-
-/* =================== DASHBOARD =================== */
 export const getDashboardStats = () =>
   API.get("/admin/dashboard");
+
+/* ===================== ADMIN PRODUCTS ===================== 
+*/
+
+export const getProducts = () =>
+  API.get("/admin/products");   
+
+export const createProduct = (payload) =>
+  API.post("/admin/product", payload); 
+
+export const updateProduct = (id, payload) =>
+  API.put(`/admin/product/${id}`, payload); 
+
+export const deleteProduct = (id) =>
+  API.delete(`/admin/product/${id}`); 
+export const getProductById = (id) =>
+  API.get(`/admin/products/${id}`);
+
+/* ===================== ADMIN ORDERS ===================== */
+
+export const getOrders = () =>
+  API.get("/admin/orders"); 
+
+export const updateOrderStatus = (id, status) =>
+  API.patch(`/admin/orders/${id}/status`, { status });
+
+// /* ===================== ADMIN USERS  ===================== */
+
+export const getAllUsers = () =>
+  API.get("/admin/users"); 
+
+export const blockUser = (id) =>
+  API.patch(`/admin/users/block/${id}`);
+
+export const unblockUser = (id) =>
+  API.patch(`/admin/users/unblock/${id}`);
+
+
+
+/* ===================== AUTH ===================== */
+
+export const loginUser = (payload) =>
+  API.post("/auth/login", payload);
+
+export const registerUser = (payload) =>
+  API.post("/auth/register", payload);
+
+export const logoutUser = () =>
+  API.post("/auth/logout");
+
+export const getProfile = () =>
+  API.get("/auth/me");
 
 export default API;
