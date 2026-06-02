@@ -5,6 +5,7 @@ import App from './App.jsx';
   import {BrowserRouter} from 'react-router-dom';
   import { CartProvider } from './Context/CartContext.jsx';
   import axios from "axios";
+  import React from 'react';
   
   axios.defaults.withCredentials = true;
 

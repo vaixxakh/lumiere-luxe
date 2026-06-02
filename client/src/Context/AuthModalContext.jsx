@@ -1,5 +1,5 @@
 import { createContext, useContext, useState  } from "react";
-
+import React from 'react';
 const AuthModalContext = createContext()
 
 export const  AuthModalProvider = ({ children}) =>{
