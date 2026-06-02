@@ -14,11 +14,22 @@
 
     const app = express();
     
-    
+    const allowedOrigins = [
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:5175",
+        "http://localhost:3000"
+    ];
+
     app.use(
         cors({
-         origin:"http://localhost:5173",
-         credentials:true
+         origin: function (origin, callback) {
+             if (!origin || /^http:\/\/localhost:\d+$/.test(origin) || allowedOrigins.indexOf(origin) !== -1) {
+                 return callback(null, true);
+             }
+             return callback(new Error("Not allowed by CORS"), false);
+         },
+         credentials: true
     }));
 
     app.use(express.json());

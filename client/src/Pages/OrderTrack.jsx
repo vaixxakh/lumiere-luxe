@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useCart } from "../Context/CartContext";
+import axios from "axios";
 import {
   Package,
   Truck,
@@ -19,14 +20,33 @@ function OrderTrack() {
   const { orders } = useCart();
   const navigate = useNavigate();
   const [orderStatus, setOrderStatus] = useState(0);
+  const [fetchedOrder, setFetchedOrder] = useState(null);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const fetchOrder = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/orders/${orderId}`,
+          { withCredentials: true }
+        );
+        setFetchedOrder(res.data);
+      } catch (err) {
+        console.error("Failed to fetch order", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOrder();
+  }, [orderId]);
 
   const savedOrders = JSON.parse(localStorage.getItem("orders")) || [];
 
   const order =
+    fetchedOrder ||
     (Array.isArray(orders) &&
-      orders.find((o) => String(o.id) === String(orderId))) ||
-    savedOrders.find((o) => String(o.id) === String(orderId));
+      orders.find((o) => String(o.id || o.orderId || o._id) === String(orderId))) ||
+    savedOrders.find((o) => String(o.id || o.orderId || o._id) === String(orderId));
 
 
   const statusTimeline = [
@@ -70,15 +90,31 @@ function OrderTrack() {
       ? order.statusHistory
       : [];
 
-    const lastStatus =
-      history.length > 0
+    let lastStatus =
+      order.status ||
+      (history.length > 0
         ? history[history.length - 1].status
-        : "Order Placed";
+        : "Order Placed");
+
+    if (lastStatus === "Pending") {
+      lastStatus = "Order Placed";
+    }
 
     const index = statuses.indexOf(lastStatus);
 
     setOrderStatus(index >= 0 ? index : 0);
   }, [order]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin w-16 h-16 border-4 border-yellow-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-gray-600 font-semibold">Loading order details...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!order) {
     return (
@@ -168,7 +204,7 @@ function OrderTrack() {
             <div>
               <p className="text-gray-600 text-xs sm:text-sm mb-1">Order ID</p>
               <p className="text-lg sm:text-2xl font-bold text-yellow-600">
-                {order.id}
+                {order.orderId || order.id || order._id}
               </p>
             </div>
             <div>
@@ -292,7 +328,7 @@ function OrderTrack() {
                   >
                     <div className="flex-1 mb-2 sm:mb-0">
                       <p className="font-semibold text-black text-sm sm:text-base">
-                        {item.name}
+                        {item.productName || item.name}
                       </p>
                       <p className="text-xs sm:text-sm text-gray-600">
                         Qty:{" "}
@@ -367,19 +403,19 @@ function OrderTrack() {
               <div className="flex justify-between text-xs sm:text-sm text-gray-600">
                 <span>Subtotal</span>
                 <span className="text-black font-semibold">
-                  ₹{order.totals?.subtotal?.toLocaleString()}
+                  ₹{(order.subtotal || order.totals?.subtotal)?.toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between text-xs sm:text-sm text-gray-600">
                 <span>Shipping</span>
                 <span className="text-black font-semibold">
-                  ₹{order.totals?.shipping?.toLocaleString()}
+                  ₹{(order.shipping || order.totals?.shipping)?.toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between text-xs sm:text-sm text-gray-600">
                 <span>Tax (18%)</span>
                 <span className="text-black font-semibold">
-                  ₹{order.totals?.tax?.toLocaleString()}
+                  ₹{(order.tax || order.totals?.tax)?.toLocaleString()}
                 </span>
               </div>
             </div>
@@ -390,7 +426,7 @@ function OrderTrack() {
                   Total Amount
                 </span>
                 <span className="text-2xl sm:text-3xl font-black text-yellow-600">
-                  ₹{order.totals?.grandTotal?.toLocaleString()}
+                  ₹{(order.total || order.totals?.grandTotal)?.toLocaleString()}
                 </span>
               </div>
             </div>
@@ -399,11 +435,13 @@ function OrderTrack() {
             <div className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
               <p className="text-xs text-gray-600 mb-1">Payment Method</p>
               <p className="text-sm sm:text-base font-semibold text-black capitalize">
-                {order.paymentMethod === "cod"
+                {order.paymentMethod?.toLowerCase() === "cod"
                   ? "💵 Cash on Delivery"
-                  : order.paymentMethod === "card"
+                  : order.paymentMethod?.toLowerCase() === "razorpay"
+                  ? "💳 Online Payment (Razorpay)"
+                  : order.paymentMethod?.toLowerCase() === "card"
                   ? "💳 Credit/Debit Card"
-                  : order.paymentMethod === "upi"
+                  : order.paymentMethod?.toLowerCase() === "upi"
                   ? "📱 UPI"
                   : "🏦 Net Banking"}
               </p>

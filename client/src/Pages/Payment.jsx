@@ -46,7 +46,7 @@ function Payment() {
       return false;
     }
     return true;
-  };q
+  };
 
   /* ================= COD ================= */
   
@@ -98,13 +98,13 @@ function Payment() {
         handler: async function (response) {
           try {
             await axios.post(
-              `${import.meta.env.VITE_API_URL}/payment/verify`,
+              `${import.meta.env.VITE_API_URL}/payment/verify-payment`,
               response,
                {withCredentials: true },
             );
 
             const orderRes = await axios.post(
-              `${import.meta.env.VITE_API_URL}/orders/place`,
+              `${import.meta.env.VITE_API_URL}/orders`,
               {
                 paymentMethod: "RAZORPAY",
                 paymentId: response.razorpay_payment_id,

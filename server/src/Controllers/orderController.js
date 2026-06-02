@@ -31,11 +31,20 @@ exports.placeOrder = async (req, res) => {
       0
     );
 
-    const shippingCharge = 50;
+    const shipping = 50;
     const tax = Math.round(subtotal * 0.03);
-    const total = subtotal + shippingCharge + tax;
+    const total = subtotal + shipping + tax;
 
     const orderId = "ORD-" + Date.now();
+
+    const formattedAddress = {
+      fullName: shippingAddress.fullName,
+      phone: shippingAddress.phoneNumber || shippingAddress.phone,
+      phoneNumber: shippingAddress.phoneNumber || shippingAddress.phone,
+      addressLine: shippingAddress.addressLine,
+      city: shippingAddress.city,
+      zipCode: shippingAddress.zipCode,
+    };
 
     const order = new Order({
       orderId,
@@ -43,7 +52,7 @@ exports.placeOrder = async (req, res) => {
       items,
       subtotal,
       shipping,
-      shippingAddress,
+      shippingAddress: formattedAddress,
       tax,
       total,
       paymentMethod,
@@ -84,10 +93,12 @@ exports.getMyOrders = async (req, res) => {
 
 exports.getSingleOrder = async (req, res) => {
   try {
-    const order = await Order.findOne({
-      _id: req.params.orderId,
-      userId: req.user.id,
-    });
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(req.params.orderId);
+    const query = isObjectId
+      ? { _id: req.params.orderId, userId: req.user.id }
+      : { orderId: req.params.orderId, userId: req.user.id };
+
+    const order = await Order.findOne(query);
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });

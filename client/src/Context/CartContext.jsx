@@ -32,11 +32,13 @@ export const CartProvider = ({ children }) => {
   };
 
   /* ================= ADD TO CART ================= */
-  const addToCart = async (productId) => {
+  const addToCart = async (productOrId, quantityParam) => {
     try {
+      const id = productOrId && typeof productOrId === "object" ? productOrId._id : productOrId;
+      const qty = (productOrId && typeof productOrId === "object" && productOrId.quantity) || quantityParam || 1;
       const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/cart`,
-        { productId, quantity: 1},
+        `${import.meta.env.VITE_API_URL}/cart/add`,
+        { productId: id, quantity: qty },
         { withCredentials: true }
       );  
       
@@ -79,7 +81,7 @@ export const CartProvider = ({ children }) => {
   const clearCart = async () => {
     try {
      const res = await axios.delete(
-        `${import.meta.env.VITE_API_URL}/cart/clear`,
+        `${import.meta.env.VITE_API_URL}/cart`,
         { withCredentials: true }
       );
       setCart(res.data.cart);
