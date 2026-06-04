@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const products = [
   {
@@ -36,57 +37,72 @@ const LuxuryProducts = () => {
   const navigate = useNavigate();
 
   const handleCategoryClick = (category) => {
-    // Navigate to products page with category filter
     navigate(`/products?category=${category}`);
   };
 
   return (
-    <section  className="min-h-screen py-6 px-2" id="products">
-      <div className="text-center mb-10 sm:mb-12 md:mb-16 px-4">
-        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-black-400 mb-3">
+    <section className="min-h-screen py-16 px-4 bg-slate-50/20" id="products">
+      
+      {/* Title Header Section */}
+      <motion.div 
+        initial={{ opacity: 0, y: -25 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+        className="text-center mb-12 sm:mb-16"
+      >
+        <span className="text-[10px] tracking-[0.3em] font-bold text-yellow-600 uppercase block mb-2">
+          Curated Styles
+        </span>
+        <h2 className="text-3xl sm:text-4xl md:text-5xl font-luxury font-bold text-slate-900 mb-3">
           Shop by Categories
         </h2>
-        <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-yellow-600 mx-auto rounded-full"></div>
-      </div>
+        <div className="w-20 h-[2px] bg-gradient-to-r from-yellow-400 to-yellow-600 mx-auto rounded-full"></div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 px-4 sm:px-6 max-w-7xl mx-auto">
-        {products.map((product) => (
-          <div
+      {/* Categories Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 px-2 max-w-7xl mx-auto">
+        {products.map((product, index) => (
+          <motion.div
             key={product.id}
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.6, delay: index * 0.1, type: "spring", stiffness: 80 }}
             onClick={() => handleCategoryClick(product.category)}
-            className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-200 hover:border-yellow-400 cursor-pointer"
+            className="group bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-xl hover:border-yellow-500/20 border border-slate-100 cursor-pointer transition-all duration-300"
           >
             {/* Image Container with Overlay */}
-            <div className="relative overflow-hidden h-56 sm:h-64">
+            <div className="relative overflow-hidden h-56 sm:h-64 bg-slate-100">
               <img
                 src={product.image}
                 alt={product.name}
-                className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+                className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               
               {/* Shine Effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
             </div>
 
             {/* Content */}
-            <div className="p-5 sm:p-6 bg-gradient-to-b from-white to-gray-50">
-              <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2 group-hover:text-yellow-600 transition-colors duration-300">
+            <div className="p-6 bg-gradient-to-b from-white to-slate-50/50">
+              <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-2 group-hover:text-yellow-600 transition-colors duration-300">
                 {product.name}
               </h3>
-              <p className="text-gray-600 text-xs sm:text-sm leading-relaxed line-clamp-2">
+              <p className="text-slate-500 text-xs sm:text-sm leading-relaxed line-clamp-2">
                 {product.description}
               </p>
               
               {/* Decorative Element */}
               <div className="mt-4 flex items-center gap-2">
-                <div className="w-8 h-0.5 bg-yellow-400 group-hover:w-16 transition-all duration-300"></div>
-                <span className="text-xs font-semibold text-yellow-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  View Category
+                <div className="w-8 h-[2px] bg-yellow-400 group-hover:w-16 transition-all duration-300"></div>
+                <span className="text-[10px] font-extrabold tracking-wider uppercase text-yellow-600 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+                  Explore Category
                 </span>
               </div>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
     </section>

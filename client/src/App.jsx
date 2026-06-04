@@ -38,7 +38,7 @@ import AdminRoute from "./components/AdminRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 /* =============== LAYOUT =============== */
-const Layout = ({ children }) => {
+const Layout = ({ children, searchTerm, setSearchTerm }) => {
   const location = useLocation();
 
   const NO_LAYOUT_PAGES = [
@@ -54,7 +54,9 @@ const Layout = ({ children }) => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {!shouldHideLayout && <Navbar />}
+      {!shouldHideLayout && (
+        <Navbar onSearch={setSearchTerm} initialSearchTerm={searchTerm} />
+      )}
       <main className="flex-1">{children}</main>
     </div>
   );
@@ -80,7 +82,7 @@ function AppInner() {
     <>
       <ToastContainer position="top-center" autoClose={1500} />
 
-      <Layout>
+      <Layout searchTerm={searchTerm} setSearchTerm={setSearchTerm}>
         <ScrollToTop />
         <Routes>
           {/* PUBLIC */}

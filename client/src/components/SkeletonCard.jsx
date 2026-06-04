@@ -1,26 +1,33 @@
+import React from "react";
+
 const ProductSkeleton = () => {
   return (
-    <div className="bg-white border border-gray-200  overflow-hidden shadow-sm animate-pulse">
-      {/* Image */}
-      <div className="h-48 sm:h-56 bg-gray-300"></div>
+    <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm animate-pulse flex flex-col h-full">
+      {/* Image Skeleton */}
+      <div className="aspect-square bg-slate-200 w-full"></div>
 
-      <div className="p-4 space-y-3">
-        {/* Title */}
-        <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+      {/* Content Skeleton */}
+      <div className="p-5 flex-grow space-y-3.5">
+        {/* Category Badge */}
+        <div className="h-3 bg-slate-200 rounded-md w-1/4"></div>
 
-        {/* Description */}
-        <div className="h-3 bg-gray-200 rounded w-full"></div>
-        <div className="h-3 bg-gray-200 rounded w-5/6"></div>
-
-        {/* Price & Rating */}
-        <div className="flex justify-between items-center mt-3">
-          <div className="h-4 bg-gray-300 rounded w-16"></div>
-          <div className="h-4 bg-gray-300 rounded w-10"></div>
+        {/* Title Lines */}
+        <div className="space-y-2">
+          <div className="h-4 bg-slate-200 rounded-md w-11/12"></div>
+          <div className="h-4 bg-slate-200 rounded-md w-4/5"></div>
         </div>
 
-        {/* Buttons */}
-        {/* <div className="h-9 bg-gray-300 rounded mt-4"></div>
-        <div className="h-9 bg-gray-300 rounded"></div> */}
+        {/* Description Lines */}
+        <div className="space-y-2 pt-2">
+          <div className="h-3 bg-slate-100 rounded-md w-full"></div>
+          <div className="h-3 bg-slate-100 rounded-md w-5/6"></div>
+        </div>
+
+        {/* Bottom Rating and Price */}
+        <div className="flex justify-between items-center pt-4 border-t border-slate-100">
+          <div className="h-6 bg-slate-200 rounded-lg w-12"></div>
+          <div className="h-5 bg-slate-200 rounded-lg w-20"></div>
+        </div>
       </div>
     </div>
   );

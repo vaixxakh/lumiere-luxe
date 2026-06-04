@@ -8,7 +8,7 @@ import "./Payment.css"
 
 function Payment() {
   const navigate = useNavigate();
-  const { cart } = useCart();
+  const { cart, clearCart } = useCart();
 
   const [processing, setProcessing] = useState(false);
 
@@ -66,6 +66,7 @@ function Payment() {
     );
 
     toast.success("Order placed successfully!");
+    clearCart();
     navigate(`/track/${data.orderId}`);
 
     } catch (error) {
@@ -114,6 +115,7 @@ function Payment() {
             );
             
             toast.success("Payment successful!");
+            clearCart();
             navigate(`/track/${orderRes.data.orderId}`);
           } catch {
             toast.error("Order creation failed!")
