@@ -33,21 +33,33 @@ export const CartProvider = ({ children }) => {
 
   /* ================= ADD TO CART ================= */
   const addToCart = async (productOrId, quantityParam) => {
-    try {
-      const id = productOrId && typeof productOrId === "object" ? productOrId._id : productOrId;
-      const qty = (productOrId && typeof productOrId === "object" && productOrId.quantity) || quantityParam || 1;
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/cart/add`,
-        { productId: id, quantity: qty },
-        { withCredentials: true }
-      );  
-      
-      setCart(res.data.cart);
-    } catch (err) {
-      console.error("ADD TO CART ERROR", err.response?.data || err.message);
-    }
-  };
+  try {
+    const id =
+      typeof productOrId === "object"
+        ? productOrId._id
+        : productOrId;
 
+    console.log("Sending Product ID:", id);
+
+    const res = await axios.post(
+      `${import.meta.env.VITE_API_URL}/cart/add`,
+      {
+        productId: id,
+        quantity: quantityParam || productOrId.quantity || 1,
+      },
+      { withCredentials: true }
+    );
+
+    console.log("Cart Add Response:", res.data);
+
+    setCart(res.data.cart);
+
+    return true;
+  } catch (err) {
+    console.error("ADD TO CART ERROR", err.response?.data || err.message);
+    return false;
+  }
+};
   /* ================= REMOVE FROM CART ================= */
   const removeFromCart = async (productId) => {
     try {
@@ -89,17 +101,25 @@ export const CartProvider = ({ children }) => {
   };
 
   /* ================= WISHLIST ================= */
-  const addToWishlist = (productId) => {
-    setWishlist(prev =>
-      prev.includes(productId) ? prev : [...prev, productId]
+ const addToWishlist = (product) => {
+  setWishlist(prev => {
+    const exists = prev.some(
+      item => item._id === product._id
     );
-  };
+
+    if (exists) return prev;
+
+    return [...prev, product];
+  });
+};
   const removeFromWishlist = (productId) => {
-    setWishlist(prev => prev.filter(id => id !== productId));
-  };
+  setWishlist(prev =>
+    prev.filter(item => item._id !== productId)
+  );
+};
 
   const isWishlisted = (productId) =>
-    wishlist.includes(productId);
+    wishlist.some(item => item._id === productId);
 
   const moveToCart = async (productId) => {
     try {

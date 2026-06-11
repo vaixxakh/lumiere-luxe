@@ -85,7 +85,7 @@ function Wishlist() {
                       Add to Cart
                     </button>
                     <button
-                      onClick={() => removeFromWishlist(product._id)}
+                      onClick={() => removeFromWishlist(product._id || product.id)}
                       className="flex-1 bg-red-100 hover:bg-red-200 text-red-600 font-bold py-2.5 px-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 border border-red-300 text-sm sm:text-base"
                     >
                       <Trash2 size={16} className="sm:w-[18px] sm:h-[18px]" />
